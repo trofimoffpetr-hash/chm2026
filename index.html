@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Конкурс прогнозов ЧМ 2026 — Дашборд</title>
+<style>
+  :root{
+    --bg:#0c1018; --bg2:#121826; --card:#161d2e; --card2:#1c2438;
+    --line:#283044; --txt:#e8edf6; --mut:#94a3b8; --mut2:#64748b;
+    --acc:#10b981; --acc2:#22d3ee; --gold:#f6c945;
+    --win:#22c55e; --draw:#eab308; --loss:#ef4444;
+    --cA:#64748b; --cB:#3b82f6; --cC:#10b981; --cD:#f59e0b; --cE:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:
+      radial-gradient(1200px 600px at 80% -10%, #16243a 0%, transparent 55%),
+      radial-gradient(900px 500px at -10% 10%, #122a26 0%, transparent 50%),
+      var(--bg);
+    color:var(--txt);min-height:100vh;padding:24px 18px 60px}
+  .wrap{max-width:1180px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:18px}
+  .ttl h1{font-size:26px;font-weight:700;letter-spacing:.3px;background:linear-gradient(90deg,#fff,var(--acc2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .ttl p{color:var(--mut);font-size:13.5px;margin-top:4px}
+  .live{display:flex;align-items:center;gap:8px;border:1px solid var(--line);padding:8px 13px;border-radius:10px;font-size:12.5px;background:var(--card)}
+  .live .led{width:9px;height:9px;border-radius:50%;background:var(--mut2);box-shadow:0 0 0 0 rgba(16,185,129,.5)}
+  .live.on .led{background:var(--acc);animation:pulse 2s infinite}
+  .live.off .led{background:var(--mut2)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}70%{box-shadow:0 0 0 7px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+  .live b{color:var(--txt);font-weight:600}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:18px 0 24px}
+  .stat{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+  .stat .lbl{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.6px}
+  .stat .val{font-size:26px;font-weight:700;margin-top:6px}
+  .stat .sub{font-size:12px;color:var(--mut2);margin-top:2px}
+  .stat .ico{position:absolute;right:14px;top:14px;font-size:22px;opacity:.25}
+  .sec-h{display:flex;align-items:center;gap:10px;margin:30px 0 14px}
+  .sec-h h2{font-size:18px;font-weight:600}
+  .sec-h .dot{width:9px;height:9px;border-radius:50%;background:var(--acc)}
+  .sec-h .hint{color:var(--mut2);font-size:12.5px;font-weight:400;margin-left:auto}
+  .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .board{display:flex;flex-direction:column;gap:9px}
+  .row{background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;transition:.18s}
+  .row:hover{border-color:#3a4a66}
+  .row.me{border-color:rgba(34,211,238,.5);box-shadow:0 0 0 1px rgba(34,211,238,.15)}
+  .rhead{display:flex;align-items:center;gap:13px;padding:13px 15px;cursor:pointer}
+  .rank{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:9px;font-weight:700;font-size:14px;background:var(--card2);color:var(--mut)}
+  .rank.g1{background:linear-gradient(145deg,#f6c945,#b8860b);color:#3a2c00}
+  .rank.g2{background:linear-gradient(145deg,#e2e8f0,#94a3b8);color:#1e293b}
+  .rank.g3{background:linear-gradient(145deg,#d9914a,#8a4f1f);color:#2a1500}
+  .who{flex:0 0 132px;min-width:132px}
+  .who .nm{font-weight:600;font-size:15px;display:flex;align-items:center;gap:7px}
+  .who .me-badge{font-size:9.5px;background:rgba(34,211,238,.18);color:var(--acc2);padding:2px 6px;border-radius:5px;letter-spacing:.5px}
+  .who .tt{font-size:11.5px;color:var(--mut2);margin-top:2px}
+  .barwrap{flex:1;min-width:60px}
+  .bar{height:13px;border-radius:7px;background:var(--card2);overflow:hidden}
+  .bar > i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .5s cubic-bezier(.2,.7,.2,1)}
+  .row.g1 .bar>i{background:linear-gradient(90deg,#f6c945,#ffe9a0)}
+  .score{flex:0 0 92px;text-align:right}
+  .score .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+  .score .u{font-size:10.5px;color:var(--mut2)}
+  .tours{flex:0 0 138px;display:flex;gap:5px}
+  .tr{flex:1;text-align:center;background:var(--card2);border:1px solid var(--line);border-radius:7px;padding:3px 2px}
+  .trl{display:block;font-size:9px;color:var(--mut2);letter-spacing:.3px}
+  .trv{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+  .chev{flex:0 0 18px;color:var(--mut2);font-size:13px;transition:.2s}
+  .row.open .chev{transform:rotate(90deg)}
+  .detail{display:none;border-top:1px solid var(--line);padding:6px 15px 14px;background:var(--bg2)}
+  .row.open .detail{display:block}
+  .tline{display:grid;grid-template-columns:minmax(0,1.4fr) 50px 54px 66px 60px;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid rgba(40,48,68,.5);font-size:13px}
+  .tline:last-child{border-bottom:none}
+  .tline .tn{display:flex;align-items:center;gap:8px}
+  .clb{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:5px;color:#0b0f17}
+  .tline .col{color:var(--mut);font-variant-numeric:tabular-nums;text-align:right;font-size:12px}
+  .tline .pts{font-weight:600;color:var(--txt)}
+  .tline .contrib{font-weight:700;color:var(--acc2);text-align:right;font-variant-numeric:tabular-nums}
+  .dh{display:grid;grid-template-columns:minmax(0,1.4fr) 50px 54px 66px 60px;gap:10px;padding:4px;font-size:10.5px;color:var(--mut2);text-transform:uppercase;letter-spacing:.5px}
+  .dh span:not(:first-child){text-align:right}
+  .teamcard{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:9px}
+  .tc-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .tc-top .tn{font-weight:600;font-size:14px;flex:1}
+  .tc-top .pp{font-size:11px;color:var(--mut2)}
+  .tc-pts{font-size:12px;color:var(--acc);font-weight:700;font-variant-numeric:tabular-nums}
+  .matches{display:flex;gap:8px}
+  .m{position:relative;flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 4px;text-align:center;background:var(--card2);user-select:none}
+  .m .ml{font-size:9.5px;color:var(--mut2);letter-spacing:.4px}
+  .m .mv{font-size:14px;font-weight:700;margin-top:3px;color:var(--mut)}
+  .m.win{background:rgba(34,197,94,.16);border-color:rgba(34,197,94,.5)}.m.win .mv{color:#4ade80}
+  .m.draw{background:rgba(234,179,8,.16);border-color:rgba(234,179,8,.5)}.m.draw .mv{color:#facc15}
+  .m.loss{background:rgba(239,68,68,.16);border-color:rgba(239,68,68,.5)}.m.loss .mv{color:#f87171}
+  .clusterhdr{display:flex;align-items:center;gap:8px;margin:16px 0 9px;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.7px}
+  .clusterhdr .ln{flex:1;height:1px;background:var(--line)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .btn{background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:8px 14px;border-radius:9px;font-size:13px;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:var(--mut2);background:var(--card)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--mut);margin-bottom:6px}
+  .legend b{font-weight:600}
+  footer{text-align:center;color:var(--mut2);font-size:12px;margin-top:34px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="ttl">
+      <h1>⚽ Конкурс прогнозов · ЧМ 2026</h1>
+      <p>Раунд 1 — Групповой этап · портфельный прогноз</p>
+    </div>
+    <div class="live off" id="liveBox"><span class="led"></span><span id="liveTxt">Подключение…</span></div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="grid">
+    <div>
+      <div class="sec-h"><span class="dot"></span><h2>Турнирная таблица</h2><span class="hint">Т1·Т2·Т3 — % монет с сыгранным матчем тура · клик по строке раскроет портфель</span></div>
+      <div class="board" id="board"></div>
+    </div>
+    <div>
+      <div class="sec-h"><span class="dot" style="background:var(--acc2)"></span><h2>Результаты команд</h2><span class="hint">3 матча группы</span></div>
+      <div class="toolbar">
+        <button class="btn" id="exportBtn">⬇ Экспорт</button>
+      </div>
+      <div class="legend">
+        <span><b style="color:var(--cA)">A</b> ×1.00</span>
+        <span><b style="color:var(--cB)">B</b> ×1.25</span>
+        <span><b style="color:var(--cC)">C</b> ×1.50</span>
+        <span><b style="color:var(--cD)">D</b> ×1.75</span>
+        <span><b style="color:var(--cE)">E</b> ×2.00</span>
+      </div>
+      <div id="teams"></div>
+    </div>
+  </div>
+
+  <footer>
+    Приз лидеру группового этапа — 10% банка. Итог турнира (Раунды 1+2): топ-3 делят 85% в пропорции 45% · 25% · 15%.<br>
+    Источник результатов: football-data.org. Ставки на плей-офф (Раунд 2) можно добавить позже.
+  </footer>
+</div>
+
+<script>
+const CLUSTER_COEF={A:1.00,B:1.25,C:1.50,D:1.75,E:2.00};
+const CLUSTER_COLOR={A:'var(--cA)',B:'var(--cB)',C:'var(--cC)',D:'var(--cD)',E:'var(--cE)'};
+const TEAM_CLUSTER={
+ "Франция":"A","Испания":"A","Аргентина":"A","Англия":"A","Португалия":"A","Бразилия":"A",
+ "Нидерланды":"A","Марокко":"A","Бельгия":"A","Германия":"A","Хорватия":"A","Колумбия":"A",
+ "Сенегал":"A","Мексика":"A","США":"A",
+ "Уругвай":"B","Норвегия":"B","Канада":"B","Египет":"B","Алжир":"B","Австралия":"B",
+ "Южная Корея":"B","Австрия":"B","Эквадор":"B","Турция":"B","Иран":"B","Швейцария":"B","Япония":"B",
+ "Кот-д'Ивуар":"C","Панама":"C","Парагвай":"C","Швеция":"C","Шотландия":"C","Чехия":"C","ДР Конго":"C","Тунис":"C",
+ "Босния и Герцеговина":"D","Иордания":"D","Саудовская Аравия":"D","ЮАР":"D","Ирак":"D","Катар":"D","Узбекистан":"D",
+ "Кабо-Верде":"E","Гана":"E","Кюрасао":"E","Гаити":"E","Новая Зеландия":"E"
+};
+const ME="Петя";
+const BETS={
+ "Никита":[["Франция",26],["Англия",22],["Испания",20],["Португалия",15],["Аргентина",10],["Бразилия",5],["Нидерланды",1],["Бельгия",1]],
+ "Арчи":[["Испания",15],["Франция",14],["Португалия",13],["Бразилия",12],["Германия",10],["Норвегия",10],["Аргентина",9],["Марокко",7],["Япония",6],["Нидерланды",4]],
+ "Надя":[["Испания",20],["Аргентина",15],["Франция",15],["Бразилия",10],["Бельгия",10],["Англия",10],["Швейцария",5],["Уругвай",5],["Кот-д'Ивуар",5],["Гана",5]],
+ "Саня Д":[["Германия",15],["Франция",15],["Босния и Герцеговина",7],["Бразилия",16],["Аргентина",20],["Испания",12],["Португалия",8],["Турция",7]],
+ "Саня В":[["Испания",19],["Франция",16],["Аргентина",14],["Бразилия",13],["Англия",10],["Норвегия",10],["Кот-д'Ивуар",8],["Австрия",4],["Алжир",3],["Иран",2],["Босния и Герцеговина",1]],
+ "Маша":[["Испания",25],["Нидерланды",20],["Бразилия",5],["Франция",5],["Аргентина",10],["Бельгия",10],["Швейцария",20],["Турция",5]],
+ "Леша":[["Испания",20],["Франция",19],["Англия",14],["Аргентина",10],["Португалия",6],["Норвегия",12],["Эквадор",7],["Алжир",5],["Уругвай",4],["Шотландия",3]],
+ "Петя":[["Испания",20],["Англия",18],["Португалия",18],["Нидерланды",15],["Франция",15],["Норвегия",5],["Швейцария",5],["Турция",4]],
+ "Влад":[["Франция",20],["Испания",18],["Аргентина",17],["Англия",12],["Норвегия",8],["Германия",12],["Бразилия",8],["Португалия",5]],
+ "Рубен":[["Испания",93],["Франция",1],["Англия",1],["Аргентина",1],["Португалия",1],["Германия",1],["Бразилия",1],["Нидерланды",1]],
+ "Панчо":[["Аргентина",12],["Бразилия",12],["Испания",12],["Англия",10],["Португалия",10],["Франция",10],["Германия",7],["Нидерланды",5],["Уругвай",7],["Норвегия",5],["Канада",5],["Узбекистан",5]]
+};
+const ENTRY_FEE=2000;
+const PLAYERS=Object.keys(BETS);
+const BANK=PLAYERS.length*ENTRY_FEE;
+const TEAMS=[...new Set(Object.values(BETS).flat().map(b=>b[0]))].sort((a,b)=>a.localeCompare(b,'ru'));
+const TEAM_BACKERS={};
+TEAMS.forEach(t=>TEAM_BACKERS[t]=PLAYERS.filter(p=>BETS[p].some(b=>b[0]===t)).length);
+
+let LIVE={teams:{},updatedAt:null,matches:0};  // данные с сервера
+
+const PTS={'W':3,'D':1,'L':0,'':0};
+function liveOf(t){return (LIVE.teams&&LIVE.teams[t])||['','',''];}
+function teamPoints(t){return liveOf(t).reduce((s,r)=>s+PTS[r],0);}
+function teamPlayed(t){return liveOf(t).filter(r=>r!=='').length;}
+
+function playerScore(p){
+  let total=0;const lines=[];const tours=[0,0,0];
+  for(const [team,coins] of BETS[p]){
+    const cl=TEAM_CLUSTER[team]||'A';const coef=CLUSTER_COEF[cl];
+    const pts=teamPoints(team);const played=teamPlayed(team);
+    const contrib=coins*coef*pts;total+=contrib;
+    const lv=liveOf(team);
+    for(let t=0;t<3;t++){ if(lv[t]) tours[t]+=coins; }
+    lines.push({team,coins,cl,coef,pts,played,contrib});
+  }
+  lines.sort((a,b)=>b.contrib-a.contrib||b.coins-a.coins);
+  return {total,lines,tours};
+}
+function fmt(n){return Number.isInteger(n)?n.toString():n.toFixed(1).replace(/\.0$/,'');}
+function fmt2(n){return n.toFixed(2);}
+function rub(n){return n.toLocaleString('ru-RU')+' ₽';}
+
+let openP=null;
+function renderBoard(){
+  const data=PLAYERS.map(p=>({p,...playerScore(p)})).sort((a,b)=>b.total-a.total);
+  const max=Math.max(1,...data.map(d=>d.total));
+  document.getElementById('board').innerHTML=data.map((d,i)=>{
+    const rk=i+1;const gcl=rk<=3?('g'+rk):'';
+    const det=`<div class="detail"><div class="dh"><span>Команда</span><span>Монеты</span><span>Коэф.</span><span>Очки</span><span>Вклад</span></div>`+
+      d.lines.map(l=>`<div class="tline">
+        <span class="tn"><span class="clb" style="background:${CLUSTER_COLOR[l.cl]}">${l.cl}</span>${l.team}</span>
+        <span class="col">${l.coins}</span><span class="col">×${l.coef.toFixed(2)}</span>
+        <span class="col pts">${l.pts} <span style="color:var(--mut2);font-size:10px">(${l.played}/3)</span></span>
+        <span class="contrib">${fmt2(l.contrib)}</span></div>`).join('')+`</div>`;
+    const tr=d.tours.map((v,i)=>`<div class="tr"><span class="trl">Т${i+1}</span><span class="trv">${v}%</span></div>`).join('');
+    return `<div class="row ${gcl} ${d.p===ME?'me':''} ${openP===d.p?'open':''}" data-p="${d.p}">
+      <div class="rhead"><div class="rank ${gcl}">${rk}</div>
+        <div class="who"><div class="nm">${d.p}${d.p===ME?'<span class="me-badge">ВЫ</span>':''}</div>
+          <div class="tt">${BETS[d.p].length} команд</div></div>
+        <div class="barwrap"><div class="bar"><i style="width:${(d.total/max*100).toFixed(1)}%"></i></div></div>
+        <div class="tours" title="% монет, чьи матчи этого тура уже сыграны">${tr}</div>
+        <div class="score"><div class="v">${fmt2(d.total)}</div><div class="u">очков</div></div>
+        <div class="chev">▶</div></div>${det}</div>`;
+  }).join('');
+  document.querySelectorAll('.row').forEach(r=>{
+    r.querySelector('.rhead').onclick=()=>{const p=r.dataset.p;openP=openP===p?null:p;renderBoard();};
+  });
+}
+
+function renderTeams(){
+  const byCl={A:[],B:[],C:[],D:[],E:[]};
+  TEAMS.forEach(t=>byCl[TEAM_CLUSTER[t]||'A'].push(t));
+  const names={A:'Кластер A · ×1.00',B:'Кластер B · ×1.25',C:'Кластер C · ×1.50',D:'Кластер D · ×1.75',E:'Кластер E · ×2.00'};
+  let html='';
+  for(const cl of ['A','B','C','D','E']){
+    if(!byCl[cl].length)continue;
+    html+=`<div class="clusterhdr"><span style="color:${CLUSTER_COLOR[cl]}">${names[cl]}</span><span class="ln"></span></div>`;
+    for(const t of byCl[cl]){
+      const e=liveOf(t);const pts=teamPoints(t);
+      const cells=[0,1,2].map(i=>{
+        const map={'W':['win','В'],'D':['draw','Н'],'L':['loss','П'],'':['','—']};
+        const [c,lab]=map[e[i]]||['','—'];
+        return `<div class="m ${c}"><div class="ml">Матч ${i+1}</div><div class="mv">${lab}</div></div>`;
+      }).join('');
+      html+=`<div class="teamcard"><div class="tc-top"><span class="clb" style="background:${CLUSTER_COLOR[cl]}">${cl}</span>
+          <span class="tn">${t}</span><span class="pp">${TEAM_BACKERS[t]} ст.</span>
+          <span class="tc-pts">${pts} очк · ${teamPlayed(t)}/3</span></div>
+        <div class="matches">${cells}</div></div>`;
+    }
+  }
+  document.getElementById('teams').innerHTML=html;
+}
+
+function renderStats(){
+  const data=PLAYERS.map(p=>({p,t:playerScore(p).total})).sort((a,b)=>b.t-a.t);
+  const leader=data[0];
+  const totalSlots=TEAMS.length*3;
+  const playedSlots=TEAMS.reduce((s,t)=>s+teamPlayed(t),0);
+  const pct=Math.round(playedSlots/totalSlots*100);
+  const cards=[
+    {lbl:'Участников',val:PLAYERS.length,sub:'портфели по 100 монет',ico:'👥'},
+    {lbl:'Банк',val:rub(BANK),sub:`взнос ${rub(ENTRY_FEE)} × ${PLAYERS.length}`,ico:'💰'},
+    {lbl:'Лидер этапа',val:leader.t>0?leader.p:'—',sub:leader.t>0?`${fmt2(leader.t)} очк · приз 10% = ${rub(Math.round(BANK*0.1))}`:'матчи ещё не сыграны',ico:'🏆'},
+    {lbl:'Результатов внесено',val:`${playedSlots} / ${totalSlots}`,sub:`сыграно ${pct}% матчей групп`,ico:'⚽'},
+  ];
+  document.getElementById('stats').innerHTML=cards.map(c=>
+    `<div class="stat"><div class="ico">${c.ico}</div><div class="lbl">${c.lbl}</div><div class="val">${c.val}</div><div class="sub">${c.sub}</div></div>`).join('');
+}
+
+function renderAll(){renderStats();renderBoard();renderTeams();}
+
+function setLive(state,info){
+  const box=document.getElementById('liveBox');const txt=document.getElementById('liveTxt');
+  box.classList.remove('on','off');
+  if(state){box.classList.add('on');txt.innerHTML=`<b>LIVE</b> · обновлено ${info.updatedAt} · ${info.matches} матчей`;}
+  else{box.classList.add('off');txt.textContent='Нет связи с сервером — обновится автоматически';}
+}
+
+async function poll(){
+  try{
+    const r=await fetch('results.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    LIVE=j;setLive(true,j);renderAll();
+  }catch(e){setLive(false);}
+}
+
+document.getElementById('exportBtn').onclick=()=>{
+  const rows=[['Команда','Кластер','Коэф','Матч1','Матч2','Матч3','Очки']];
+  TEAMS.forEach(t=>{const cl=TEAM_CLUSTER[t];const e=liveOf(t);rows.push([t,cl,CLUSTER_COEF[cl],e[0]||'-',e[1]||'-',e[2]||'-',teamPoints(t)]);});
+  rows.push([]);rows.push(['Участник','Очки (Раунд 1)']);
+  PLAYERS.map(p=>({p,t:playerScore(p).total})).sort((a,b)=>b.t-a.t).forEach(d=>rows.push([d.p,fmt2(d.t)]));
+  const csv='﻿'+rows.map(r=>r.join(';')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='ЧМ2026_результаты.csv';a.click();
+};
+
+renderAll();
+poll();
+setInterval(poll,45000);
+</script>
+</body>
+</html>

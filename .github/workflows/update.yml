@@ -1,0 +1,37 @@
+name: Update results
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # каждые ~5 минут (минимальный интервал GitHub)
+  workflow_dispatch:          # можно запускать вручную из вкладки Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-results
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Fetch & compute results
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+        run: python update_results.py
+      - name: Commit if changed
+        run: |
+          git config user.name "wc-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results.json
+          if git diff --staged --quiet; then
+            echo "Без изменений."
+          else
+            git commit -m "Авто-обновление результатов"
+            git push
+          fi
