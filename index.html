@@ -44,12 +44,12 @@
   .row{background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;transition:.18s}
   .row:hover{border-color:#3a4a66}
   .row.me{border-color:rgba(34,211,238,.5);box-shadow:0 0 0 1px rgba(34,211,238,.15)}
-  .rhead{display:flex;align-items:center;gap:13px;padding:13px 15px;cursor:pointer}
+  .rhead{display:flex;align-items:center;gap:11px;padding:13px 15px;cursor:pointer}
   .rank{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:9px;font-weight:700;font-size:14px;background:var(--card2);color:var(--mut)}
   .rank.g1{background:linear-gradient(145deg,#f6c945,#b8860b);color:#3a2c00}
   .rank.g2{background:linear-gradient(145deg,#e2e8f0,#94a3b8);color:#1e293b}
   .rank.g3{background:linear-gradient(145deg,#d9914a,#8a4f1f);color:#2a1500}
-  .who{flex:0 0 132px;min-width:132px}
+  .who{flex:0 0 118px;min-width:118px}
   .who .nm{font-weight:600;font-size:15px;display:flex;align-items:center;gap:7px}
   .who .me-badge{font-size:9.5px;background:rgba(34,211,238,.18);color:var(--acc2);padding:2px 6px;border-radius:5px;letter-spacing:.5px}
   .who .tt{font-size:11.5px;color:var(--mut2);margin-top:2px}
@@ -57,10 +57,12 @@
   .bar{height:13px;border-radius:7px;background:var(--card2);overflow:hidden}
   .bar > i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .5s cubic-bezier(.2,.7,.2,1)}
   .row.g1 .bar>i{background:linear-gradient(90deg,#f6c945,#ffe9a0)}
-  .score{flex:0 0 92px;text-align:right}
+  .score{flex:0 0 84px;text-align:right}
   .score .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
   .score .u{font-size:10.5px;color:var(--mut2)}
-  .tours{flex:0 0 138px;display:flex;gap:5px}
+  .srate{flex:0 0 58px;text-align:center;padding:6px 4px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+  .srate.na{background:var(--card2);color:var(--mut2)}
+  .tours{flex:0 0 126px;display:flex;gap:5px}
   .tr{flex:1;text-align:center;background:var(--card2);border:1px solid var(--line);border-radius:7px;padding:3px 2px}
   .trl{display:block;font-size:9px;color:var(--mut2);letter-spacing:.3px}
   .trv{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -113,7 +115,7 @@
 
   <div class="grid">
     <div>
-      <div class="sec-h"><span class="dot"></span><h2>Турнирная таблица</h2><span class="hint">Т1·Т2·Т3 — % монет с сыгранным матчем тура · клик по строке раскроет портфель</span></div>
+      <div class="sec-h"><span class="dot"></span><h2>Турнирная таблица</h2><span class="hint">Т1·Т2·Т3 — % монет с сыгранным матчем тура · % справа — success rate (очки от максимума с учётом коэф.) · клик раскроет портфель</span></div>
       <div class="board" id="board"></div>
     </div>
     <div>
@@ -180,17 +182,19 @@ function teamPoints(t){return liveOf(t).reduce((s,r)=>s+PTS[r],0);}
 function teamPlayed(t){return liveOf(t).filter(r=>r!=='').length;}
 
 function playerScore(p){
-  let total=0;const lines=[];const tours=[0,0,0];
+  let total=0,maxposs=0;const lines=[];const tours=[0,0,0];
   for(const [team,coins] of BETS[p]){
     const cl=TEAM_CLUSTER[team]||'A';const coef=CLUSTER_COEF[cl];
     const pts=teamPoints(team);const played=teamPlayed(team);
     const contrib=coins*coef*pts;total+=contrib;
+    maxposs+=coins*coef*3*played;
     const lv=liveOf(team);
     for(let t=0;t<3;t++){ if(lv[t]) tours[t]+=coins; }
     lines.push({team,coins,cl,coef,pts,played,contrib});
   }
   lines.sort((a,b)=>b.contrib-a.contrib||b.coins-a.coins);
-  return {total,lines,tours};
+  const success=maxposs>0?total/maxposs*100:null;
+  return {total,lines,tours,maxposs,success};
 }
 function fmt(n){return Number.isInteger(n)?n.toString():n.toFixed(1).replace(/\.0$/,'');}
 function fmt2(n){return n.toFixed(2);}
@@ -216,6 +220,7 @@ function renderBoard(){
         <div class="barwrap"><div class="bar"><i style="width:${(d.total/max*100).toFixed(1)}%"></i></div></div>
         <div class="tours" title="% монет, чьи матчи этого тура уже сыграны">${tr}</div>
         <div class="score"><div class="v">${fmt2(d.total)}</div><div class="u">очков</div></div>
+        ${d.success==null?'<div class="srate na">—</div>':`<div class="srate" style="background:hsl(${(d.success*1.2).toFixed(0)} 60% 42%)" title="Success rate — набрано очков из максимума (с учётом коэффициентов)">${d.success.toFixed(1)}%</div>`}
         <div class="chev">▶</div></div>${det}</div>`;
   }).join('');
   document.querySelectorAll('.row').forEach(r=>{
@@ -284,8 +289,8 @@ async function poll(){
 document.getElementById('exportBtn').onclick=()=>{
   const rows=[['Команда','Кластер','Коэф','Матч1','Матч2','Матч3','Очки']];
   TEAMS.forEach(t=>{const cl=TEAM_CLUSTER[t];const e=liveOf(t);rows.push([t,cl,CLUSTER_COEF[cl],e[0]||'-',e[1]||'-',e[2]||'-',teamPoints(t)]);});
-  rows.push([]);rows.push(['Участник','Очки (Раунд 1)']);
-  PLAYERS.map(p=>({p,t:playerScore(p).total})).sort((a,b)=>b.t-a.t).forEach(d=>rows.push([d.p,fmt2(d.t)]));
+  rows.push([]);rows.push(['Участник','Очки (Раунд 1)','Success rate %']);
+  PLAYERS.map(p=>({p,...playerScore(p)})).sort((a,b)=>b.total-a.total).forEach(d=>rows.push([d.p,fmt2(d.total),d.success==null?'-':d.success.toFixed(1)]));
   const csv='﻿'+rows.map(r=>r.join(';')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='ЧМ2026_результаты.csv';a.click();
