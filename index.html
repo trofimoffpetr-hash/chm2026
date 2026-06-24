@@ -250,6 +250,8 @@ let LIVE={teams:{},updatedAt:null,matches:0};
 const PTS={'W':3,'D':1,'L':0,'':0};
 const BETS_R2={}; // ставки Этапа 2 (плей-офф) — заполнить после группового этапа
 const STAGE_COEF={LAST_32:1.5,LAST_16:2.5,QUARTER_FINALS:4,SEMI_FINALS:6,FINAL:9};
+const STAGE_ORDER=['LAST_32','LAST_16','QUARTER_FINALS','SEMI_FINALS','FINAL'];
+const STAGE_SHORT={LAST_32:'1/16',LAST_16:'1/8',QUARTER_FINALS:'1/4',SEMI_FINALS:'1/2',FINAL:'Ф'};
 function liveOf(t){return (LIVE.teams&&LIVE.teams[t])||['','',''];}
 function teamPoints(t){return liveOf(t).reduce((s,r)=>s+PTS[r],0);}
 function teamPlayed(t){return liveOf(t).filter(r=>r!=='').length;}
@@ -448,14 +450,64 @@ function renderStage2(){
         <div class="score" style="flex:0 0 100px"><div class="v">${fmt2(o.comb)}</div><div class="u">ИТОГ Р1+Р2</div></div>
         <div class="chev">›</div></div>${det}</div>`;
   }).join('');
+  // правая панель «Результаты плей-офф» (по командам ставок Этапа 2)
+  const clnames={A:'Кластер A · ×1.00',B:'Кластер B · ×1.25',C:'Кластер C · ×1.50',D:'Кластер D · ×1.75',E:'Кластер E · ×2.00'};
+  const ptsCell={3:['rgba(52,211,153,.16)','rgba(52,211,153,.5)','#4ade80'],2:['rgba(45,212,160,.15)','rgba(45,212,160,.5)','#2bd4a0'],1:['rgba(234,179,8,.16)','rgba(234,179,8,.5)','#facc15'],0:['rgba(239,68,68,.16)','rgba(239,68,68,.5)','#f87171']};
+  const r2backers=t=>PLAYERS.filter(p=>(BETS_R2[p]||[]).some(b=>b[0]===t)).length;
+  const teamsR2=[...new Set(Object.values(BETS_R2).flat().map(b=>b[0]))];
+  let panel='';
+  for(const cl of ['A','B','C','D','E']){
+    const ts=teamsR2.filter(t=>(TEAM_CLUSTER[t]||'A')===cl).sort((a,b)=>a.localeCompare(b,'ru'));
+    if(!ts.length)continue;
+    panel+=`<div class="clusterhdr"><span class="ct" style="color:${CLUSTER_COLOR[cl]}">${clnames[cl]}</span><span class="ln"></span></div>`;
+    for(const t of ts){
+      const ps=(LIVE.playoff&&LIVE.playoff[t])||{};
+      const cells=STAGE_ORDER.map(st=>{
+        const v=ps[st];
+        if(v==null)return `<div class="m" style="background:rgba(255,255,255,.03);border:1px solid var(--line2)"><div class="ml">${STAGE_SHORT[st]}</div><div class="mv" style="color:var(--mut)">—</div></div>`;
+        const c=ptsCell[v]||ptsCell[0];
+        return `<div class="m" style="background:${c[0]};border:1px solid ${c[1]}"><div class="ml">${STAGE_SHORT[st]}</div><div class="mv" style="color:${c[2]}">${v}</div></div>`;
+      }).join('');
+      const sumRaw=STAGE_ORDER.reduce((s,st)=>s+(ps[st]||0),0);
+      panel+=`<div class="teamcard"><div class="tc-top">
+          <span class="clb" style="background:${CLUSTER_COLOR[cl]}">${cl}</span>
+          <span class="tn">${t}</span>
+          <span class="bk">${r2backers(t)} ст.</span>
+          <span class="tc-pts">${sumRaw} очк</span></div>
+        <div class="matches">${cells}</div></div>`;
+    }
+  }
+  if(!panel)panel=`<div style="color:var(--mut2);font-size:12.5px;padding:8px 2px">Нет команд в ставках Этапа 2</div>`;
+
   el.innerHTML=`<div class="podium">${podium}</div>
     <div class="stats">${statsHtml}</div>
-    <div class="colhdr"><span class="dot" style="background:var(--gold);box-shadow:0 0 12px var(--gold)"></span><h2>Общий зачёт · Р1 + Р2</h2>
-      <span class="hint">сортировка по итогу · клик — портфель плей-офф</span></div>
-    <div class="board">${rows}</div>
-    <div class="legend" style="margin-top:10px">
-      <span>1/16 ×1.5</span><span>1/8 ×2.5</span><span>1/4 ×4</span><span>1/2 ×6</span><span>финал ×9</span></div>`;
+    <div class="grid">
+      <div>
+        <div class="colhdr"><span class="dot" style="background:var(--gold);box-shadow:0 0 12px var(--gold)"></span><h2>Общий зачёт · Р1+Р2</h2>
+          <span class="hint">сортировка по итогу · клик — портфель</span></div>
+        <div class="board">${rows}</div>
+      </div>
+      <div>
+        <div class="colhdr"><span class="dot" style="background:var(--cyan);box-shadow:0 0 12px var(--cyan)"></span><h2>Результаты плей-офф</h2>
+          <button class="exportbtn" id="exportBtn2" style="margin-left:auto">↓ ЭКСПОРТ CSV</button></div>
+        <div class="legend"><span>1/16 ×1.5</span><span>1/8 ×2.5</span><span>1/4 ×4</span><span>1/2 ×6</span><span>финал ×9</span></div>
+        ${panel}
+      </div>
+    </div>`;
   el.querySelectorAll('.row').forEach(r=>{r.querySelector('.rhead').onclick=()=>{const p=r.dataset.p2;openP2=openP2===p?null:p;renderStage2();};});
+  const eb=el.querySelector('#exportBtn2');if(eb)eb.onclick=exportR2;
+}
+
+function exportR2(){
+  const teamsR2=[...new Set(Object.values(BETS_R2).flat().map(b=>b[0]))];
+  const rows=[['Команда','Кластер'].concat(STAGE_ORDER.map(s=>STAGE_SHORT[s]))];
+  teamsR2.forEach(t=>{const ps=(LIVE.playoff&&LIVE.playoff[t])||{};rows.push([t,(TEAM_CLUSTER[t]||'')].concat(STAGE_ORDER.map(s=>ps[s]==null?'-':ps[s])));});
+  rows.push([]);rows.push(['Участник','Очки Этап 2','Итог Р1+Р2']);
+  PLAYERS.map(p=>{const r2=playerScoreR2(p).total2;const r1=playerScore(p).total;return {p,r2,comb:r1+r2};}).sort((a,b)=>b.comb-a.comb)
+    .forEach(d=>rows.push([d.p,fmt2(d.r2),fmt2(d.comb)]));
+  const csv='﻿'+rows.map(r=>r.join(';')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='ЧМ2026_плейофф.csv';a.click();
 }
 
 function renderAll(){renderStats();renderPodium();renderBoard();renderTeams();renderStage2();firstRender=false;}
