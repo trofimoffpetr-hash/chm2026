@@ -140,6 +140,7 @@
   .memo .mh{font-family:var(--mono);font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px}
   .memo .mb{font-size:12.5px;color:var(--mut);line-height:1.55}
   .stage-empty{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px 22px;max-width:760px;margin:6px auto}
+  .s2note{background:rgba(255,207,77,.08);border:1px solid rgba(255,207,77,.3);border-radius:12px;padding:12px 15px;font-size:13px;color:var(--mut);line-height:1.55;margin-bottom:18px}
 
   @media(max-width:900px){.grid{grid-template-columns:1fr}.colhdr .hint{display:none}}
   @media(max-width:560px){
@@ -406,18 +407,14 @@ function renderTeams(){
 
 function renderStage2(){
   const el=document.getElementById('stage2');
-  if(Object.keys(BETS_R2).length===0){
-    el.innerHTML=`<div class="stage-empty">
-      <div style="font-family:var(--disp);font-size:20px;font-weight:700;margin-bottom:8px">Этап 2 · Плей-офф</div>
-      <p style="color:var(--mut);font-size:13.5px;line-height:1.6;margin:0">Ставки появятся после группового этапа (дедлайн 28 июня, 21:00 МСК). Результаты плей-офф подтянутся автоматически.</p>
-      <div class="memo">
+  const noBets=Object.keys(BETS_R2).length===0;
+  const banner=noBets?`<div class="s2note">Ставки Этапа 2 ещё не внесены — показан текущий общий зачёт по Этапу 1 (очки плей-офф = 0). Портфели плей-офф и результаты стадий появятся автоматически, как только добавлю ставки (дедлайн 28 июня, 21:00 МСК).</div>`:'';
+  const memo=noBets?`<div class="memo" style="margin-top:22px">
         <div class="mc"><div class="mh">Очки матча</div><div class="mb">Победа в осн. время — 3, в ОТ/пенальти — 2, поражение в ОТ/пенальти — 1, в осн. время — 0.</div></div>
         <div class="mc"><div class="mh">Коэф. стадий</div><div class="mb">1/16 — ×1.5 · 1/8 — ×2.5 · 1/4 — ×4 · 1/2 — ×6 · финал — ×9.</div></div>
         <div class="mc"><div class="mh">Бонус лояльности</div><div class="mb">×1.5 ко всем очкам команды, если ставка повторяет Этап 1 (то же число монет).</div></div>
         <div class="mc"><div class="mh">Призовой фонд</div><div class="mb">Итог Р1+Р2: топ-3 делят 85% банка — 45% (${rub(Math.round(BANK*0.45))}) · 25% (${rub(Math.round(BANK*0.25))}) · 15% (${rub(Math.round(BANK*0.15))}).</div></div>
-      </div></div>`;
-    return;
-  }
+      </div>`:'';
   const data=PLAYERS.map(p=>{const r2=playerScoreR2(p);const r1=playerScore(p).total;return {p,r2,r1,comb:r1+r2.total2};}).sort((a,b)=>b.comb-a.comb);
   const podOrder=[{d:data[1],pos:2,cls:'p2',label:'SILVER',ring:'#cbd5e1',av:64,fs:21},{d:data[0],pos:1,cls:'p1',label:'',ring:'var(--gold)',av:80,fs:27},{d:data[2],pos:3,cls:'p3',label:'BRONZE',ring:'#d9914a',av:64,fs:21}];
   const podium=podOrder.map(c=>{if(!c.d)return '';const top=c.pos===1?'<div class="leadtab">ЛИДЕР</div>':`<div class="plabel">${c.label}</div>`;const mb=c.pos===1?14:12;return `<div class="pod ${c.cls}">${top}<div class="num">${c.pos}</div><div class="avatar" style="${avatarStyle(c.d.p,c.av,c.fs,c.ring)};margin:0 auto ${mb}px">${initials(c.d.p)}</div><div class="pname">${c.d.p}</div><div class="ppts">${fmt2(c.d.comb)}</div><div class="punit">ИТОГ Р1+Р2</div></div>`;}).join('');
@@ -479,7 +476,7 @@ function renderStage2(){
   }
   if(!panel)panel=`<div style="color:var(--mut2);font-size:12.5px;padding:8px 2px">Нет команд в ставках Этапа 2</div>`;
 
-  el.innerHTML=`<div class="podium">${podium}</div>
+  el.innerHTML=`${banner}<div class="podium">${podium}</div>
     <div class="stats">${statsHtml}</div>
     <div class="grid">
       <div>
@@ -493,7 +490,7 @@ function renderStage2(){
         <div class="legend"><span>1/16 ×1.5</span><span>1/8 ×2.5</span><span>1/4 ×4</span><span>1/2 ×6</span><span>финал ×9</span></div>
         ${panel}
       </div>
-    </div>`;
+    </div>${memo}`;
   el.querySelectorAll('.row').forEach(r=>{r.querySelector('.rhead').onclick=()=>{const p=r.dataset.p2;openP2=openP2===p?null:p;renderStage2();};});
   const eb=el.querySelector('#exportBtn2');if(eb)eb.onclick=exportR2;
 }
