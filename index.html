@@ -289,16 +289,18 @@ function srBg(s){return s==null?'background:rgba(255,255,255,.06);color:var(--mu
 function r1CoinsOf(p,team){const b=(BETS[p]||[]).find(x=>x[0]===team);return b?b[1]:null;}
 function playoffStagePts(team){const ps=(LIVE.playoff&&LIVE.playoff[team])||{};let s=0;for(const st in STAGE_COEF){if(ps[st]!=null)s+=ps[st]*STAGE_COEF[st];}return s;}
 function playerScoreR2(p){
-  let total2=0;const lines=[];
+  let total2=0;const lines=[];const stagePts={LAST_32:0,LAST_16:0,QUARTER_FINALS:0,SEMI_FINALS:0,FINAL:0};
   for(const [team,coins] of (BETS_R2[p]||[])){
     const cl=TEAM_CLUSTER[team]||'A';const coef=CLUSTER_COEF[cl];
     const loyalty=(r1CoinsOf(p,team)===coins)?1.5:1;
     const sp=playoffStagePts(team);
     const contrib=coins*coef*loyalty*sp;total2+=contrib;
+    const ps=(LIVE.playoff&&LIVE.playoff[team])||{};
+    for(const st of STAGE_ORDER){ if(ps[st]!=null) stagePts[st]+=coins*coef*loyalty*ps[st]*STAGE_COEF[st]; }
     lines.push({team,coins,cl,coef,loyalty,sp,contrib});
   }
   lines.sort((a,b)=>b.contrib-a.contrib||b.coins-a.coins);
-  return {total2,lines};
+  return {total2,lines,stagePts};
 }
 function combinedTotal(p){return playerScore(p).total+playerScoreR2(p).total2;}
 
@@ -437,14 +439,16 @@ function renderStage2(){
         <span class="col">${fmt2(l.sp)}</span>
         <span class="contrib">${fmt2(l.contrib)}</span></div>`).join('')
         :`<div style="color:var(--mut2);font-size:12px;padding:6px 4px">Нет ставок Этапа 2</div>`)+`</div>`;
+    const stg=STAGE_ORDER.map(st=>{const v=o.r2.stagePts[st];return `<div class="tr"><span class="trl">${STAGE_SHORT[st]}</span><span class="trv">${v>0?fmt2(v):'—'}</span></div>`;}).join('');
     return `<div class="row ${rank===1?'g1':''} ${openP2===o.p?'open':''}" data-p2="${o.p}">
       <div class="rhead">
         <div class="rank" style="color:${medal}">${rank}</div>
         <div class="avatar" style="${avatarStyle(o.p,34,13,null)}">${initials(o.p)}</div>
         <div class="who"><div class="nm">${o.p}</div><div class="tt">плей-офф: ${(BETS_R2[o.p]||[]).length} команд</div></div>
-        <div style="flex:1"></div>
-        <div class="score" style="flex:0 0 86px"><div class="v" style="font-size:17px;color:var(--cyan)">${fmt2(o.r2.total2)}</div><div class="u">ЭТАП 2</div></div>
-        <div class="score" style="flex:0 0 100px"><div class="v">${fmt2(o.comb)}</div><div class="u">ИТОГ Р1+Р2</div></div>
+        <div class="tours">${stg}</div>
+        <div class="score" style="flex:0 0 56px"><div class="v" style="font-size:16px">${fmt2(o.r1)}</div><div class="u">ЭТАП 1</div></div>
+        <div class="score" style="flex:0 0 62px"><div class="v" style="font-size:16px;color:var(--cyan)">${fmt2(o.r2.total2)}</div><div class="u">ЭТАП 2</div></div>
+        <div class="score" style="flex:0 0 72px"><div class="v">${fmt2(o.comb)}</div><div class="u">ИТОГ</div></div>
         <div class="chev">›</div></div>${det}</div>`;
   }).join('');
   // правая панель «Результаты плей-офф» (по командам ставок Этапа 2)
@@ -481,7 +485,7 @@ function renderStage2(){
     <div class="grid">
       <div>
         <div class="colhdr"><span class="dot" style="background:var(--gold);box-shadow:0 0 12px var(--gold)"></span><h2>Общий зачёт · Р1+Р2</h2>
-          <span class="hint">сортировка по итогу · клик — портфель</span></div>
+          <span class="hint">1/16…финал — очки Э2 по стадиям · Р1 · Э2 · Итог · клик — портфель</span></div>
         <div class="board">${rows}</div>
       </div>
       <div>
