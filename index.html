@@ -88,13 +88,11 @@
   .who{flex:0 0 120px;min-width:0}
   .who .nm{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.2px}
   .who .tt{font-size:11px;color:var(--mut2);margin-top:2px;font-weight:600;font-family:var(--mono)}
-  .barwrap{flex:1;min-width:50px}
-  .bar{height:9px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden}
-  .bar > i{display:block;height:100%;border-radius:6px;transition:width .6s cubic-bezier(.2,.7,.2,1)}
-  .tours{flex:0 0 122px;display:flex;gap:5px}
-  .tr{flex:1;text-align:center;background:rgba(255,255,255,.035);border:1px solid var(--line2);border-radius:8px;padding:4px 2px}
+  .tours{flex:1;min-width:0;display:flex;gap:6px}
+  .tr{flex:1;min-width:0;text-align:center;background:rgba(255,255,255,.035);border:1px solid var(--line2);border-radius:8px;padding:4px 3px}
   .trl{display:block;font-family:var(--mono);font-size:8px;color:var(--mut2);letter-spacing:.4px;font-weight:600}
-  .trv{font-family:var(--disp);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+  .trv{font-family:var(--disp);font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+  .trp{font-family:var(--mono);font-size:9px;color:var(--mut2);font-weight:500}
   .score{flex:0 0 80px;text-align:right}
   .score .v{font-family:var(--disp);font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.8px}
   .score .u{font-family:var(--mono);font-size:9px;color:var(--mut2);font-weight:500;letter-spacing:.5px}
@@ -144,10 +142,10 @@
     .pod .ppts{font-size:20px}.pod.p1 .ppts{font-size:26px}
     .pod .pname{font-size:13px}.pod.p1 .pname{font-size:15px}
     .pod .plabel,.pod .leadtab{font-size:9px}
-    .barwrap,.tours{display:none}
-    .who{flex:1}
-    .score{flex:0 0 68px}
-    .rhead{gap:8px;padding:10px 11px}
+    .rhead{flex-wrap:wrap;gap:8px;padding:10px 11px}
+    .who{flex:1 1 auto}
+    .score{flex:0 0 64px}
+    .tours{order:10;flex:1 0 100%;margin-top:2px}
   }
 </style>
 </head>
@@ -172,7 +170,7 @@
     <div>
       <div class="colhdr"><span class="dot" style="background:var(--lime);box-shadow:0 0 12px var(--lime)"></span>
         <h2>Турнирная таблица</h2>
-        <span class="hint">success rate · % очков от максимума · клик — портфель</span></div>
+        <span class="hint">Т1·Т2·Т3 — очки (% сыгравших ставок) · клик — портфель</span></div>
       <div class="board" id="board"></div>
     </div>
     <div>
@@ -236,19 +234,19 @@ function teamPoints(t){return liveOf(t).reduce((s,r)=>s+PTS[r],0);}
 function teamPlayed(t){return liveOf(t).filter(r=>r!=='').length;}
 
 function playerScore(p){
-  let total=0,maxposs=0;const lines=[];const tours=[0,0,0];
+  let total=0,maxposs=0;const lines=[];const tours=[0,0,0];const tourPts=[0,0,0];
   for(const [team,coins] of BETS[p]){
     const cl=TEAM_CLUSTER[team]||'A';const coef=CLUSTER_COEF[cl];
     const pts=teamPoints(team);const played=teamPlayed(team);
     const contrib=coins*coef*pts;total+=contrib;
     maxposs+=coins*coef*3*played;
     const lv=liveOf(team);
-    for(let t=0;t<3;t++){ if(lv[t]) tours[t]+=coins; }
+    for(let t=0;t<3;t++){ if(lv[t]){ tours[t]+=coins; tourPts[t]+=coins*coef*PTS[lv[t]]; } }
     lines.push({team,coins,cl,coef,pts,played,contrib});
   }
   lines.sort((a,b)=>b.contrib-a.contrib||b.coins-a.coins);
   const success=maxposs>0?total/maxposs*100:null;
-  return {total,lines,tours,maxposs,success};
+  return {total,lines,tours,tourPts,maxposs,success};
 }
 function sorted(){return PLAYERS.map(p=>({p,...playerScore(p)})).sort((a,b)=>b.total-a.total);}
 function fmt2(n){return n.toFixed(2);}
@@ -308,14 +306,17 @@ function renderStats(){
 }
 
 function renderBoard(){
-  const data=sorted();const max=Math.max(1,...data.map(d=>d.total));
+  const data=sorted();
   document.getElementById('board').innerHTML=data.map((d,i)=>{
     const rank=i+1;
     const medal=rank===1?'var(--gold)':rank===2?'#cbd5e1':rank===3?'#d9914a':'var(--mut2)';
-    const grad=rank===1?'linear-gradient(90deg,var(--gold),#ffe9a0)':'linear-gradient(90deg,var(--bar-a),var(--bar-b))';
     const an=firstRender?'anim-up':'';const delay=firstRender?`style="animation-delay:${Math.min(i*0.035,0.4).toFixed(3)}s"`:'';
     const srText=d.success==null?'—':d.success.toFixed(1)+'%';
-    const tr=d.tours.map((v,k)=>`<div class="tr"><span class="trl">Т${k+1}</span><span class="trv">${v}%</span></div>`).join('');
+    const tr=[0,1,2].map(k=>{
+      const cov=d.tours[k];
+      const inner=cov===0?'—':`${fmt2(d.tourPts[k])}<span class="trp"> (${cov}%)</span>`;
+      return `<div class="tr"><span class="trl">Т${k+1}</span><span class="trv">${inner}</span></div>`;
+    }).join('');
     const det=`<div class="detail"><div class="dh"><span>Команда</span><span>Монеты</span><span>Коэф.</span><span>Очки</span><span>Вклад</span></div>`+
       d.lines.map(l=>`<div class="tline">
         <span class="tn"><span class="clb" style="background:${CLUSTER_COLOR[l.cl]}">${l.cl}</span><span class="nm2">${l.team}</span></span>
@@ -327,7 +328,6 @@ function renderBoard(){
         <div class="rank" style="color:${medal}">${rank}</div>
         <div class="avatar" style="${avatarStyle(d.p,34,13,null)}">${initials(d.p)}</div>
         <div class="who"><div class="nm">${d.p}</div><div class="tt">${BETS[d.p].length} команд</div></div>
-        <div class="barwrap"><div class="bar"><i style="width:${(d.total/max*100).toFixed(1)}%;background:${grad}"></i></div></div>
         <div class="tours">${tr}</div>
         <div class="score"><div class="v">${fmt2(d.total)}</div><div class="u">ОЧКОВ</div></div>
         <div class="srate" style="${srBg(d.success)}">${srText}</div>
