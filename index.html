@@ -177,10 +177,8 @@
     </div>
     <div>
       <div class="colhdr"><span class="dot" style="background:var(--cyan);box-shadow:0 0 12px var(--cyan)"></span>
-        <h2>Результаты команд</h2></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
-        <button class="exportbtn" id="exportBtn">↓ ЭКСПОРТ CSV</button>
-      </div>
+        <h2>Результаты команд</h2>
+        <button class="exportbtn" id="exportBtn" style="margin-left:auto">↓ ЭКСПОРТ CSV</button></div>
       <div class="legend">
         <span><b style="color:var(--cA)">A</b> ×1.00</span>
         <span><b style="color:var(--cB)">B</b> ×1.25</span>
@@ -293,14 +291,14 @@ function renderPodium(){
 
 function renderStats(){
   const data=sorted();const leader=data[0];
-  const totalSlots=TEAMS.length*3;
-  const playedSlots=TEAMS.reduce((s,t)=>s+teamPlayed(t),0);
-  const pct=Math.round(playedSlots/totalSlots*100);
+  const GROUP_MATCHES=72;
+  const played=LIVE.matches||0;
+  const pct=Math.round(played/GROUP_MATCHES*100);
   const cards=[
     {label:'Участников',val:String(PLAYERS.length),sub:'портфели по 100 монет',tick:'var(--lime)'},
     {label:'Банк',val:rub(BANK),sub:`взнос ${rub(ENTRY_FEE)} × ${PLAYERS.length}`,tick:'var(--cyan)'},
     {label:'Лидер этапа',val:leader.total>0?leader.p:'—',sub:leader.total>0?`${fmt2(leader.total)} очк · приз 10% = ${rub(Math.round(BANK*0.1))}`:'матчи ещё не сыграны',tick:'var(--gold)'},
-    {label:'Результатов внесено',val:`${playedSlots} / ${totalSlots}`,sub:`сыграно ${pct}% матчей групп`,tick:'var(--lime)'},
+    {label:'Сыграно матчей',val:`${played} / ${GROUP_MATCHES}`,sub:`${pct}% группового этапа`,tick:'var(--lime)'},
   ];
   document.getElementById('stats').innerHTML=cards.map((c,i)=>{
     const an=firstRender?'anim-up':'';const delay=firstRender?`style="animation-delay:${(0.05+i*0.05).toFixed(2)}s"`:'';
