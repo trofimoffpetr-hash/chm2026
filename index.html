@@ -131,6 +131,16 @@
 
   footer{text-align:center;color:var(--mut2);font-size:12px;margin-top:40px;line-height:1.8;font-weight:500}
 
+  .tabs{display:flex;gap:8px;margin:0 0 22px}
+  .tab{font-family:var(--mono);font-size:12.5px;font-weight:600;letter-spacing:.3px;color:var(--mut);background:var(--panel);border:1px solid var(--line);padding:9px 16px;border-radius:11px;cursor:pointer;transition:.15s}
+  .tab:hover{border-color:rgba(255,255,255,.2)}
+  .tab.active{color:var(--bg);background:var(--lime);border-color:var(--lime)}
+  .memo{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;text-align:left;margin-top:18px}
+  .memo .mc{background:rgba(255,255,255,.03);border:1px solid var(--line2);border-radius:12px;padding:13px 15px}
+  .memo .mh{font-family:var(--mono);font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px}
+  .memo .mb{font-size:12.5px;color:var(--mut);line-height:1.55}
+  .stage-empty{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px 22px;max-width:760px;margin:6px auto}
+
   @media(max-width:900px){.grid{grid-template-columns:1fr}.colhdr .hint{display:none}}
   @media(max-width:560px){
     .wrap{padding:18px 12px 48px}
@@ -162,6 +172,12 @@
     <div class="live off" id="liveBox"><span class="led"></span><span class="txt" id="liveTxt">Подключение…</span></div>
   </header>
 
+  <div class="tabs">
+    <button class="tab active" id="tab1">Этап 1 · Группа</button>
+    <button class="tab" id="tab2">Этап 2 · Плей-офф</button>
+  </div>
+
+  <div id="stage1">
   <div class="podium" id="podium"></div>
 
   <div class="stats" id="stats"></div>
@@ -187,6 +203,9 @@
       <div id="teams"></div>
     </div>
   </div>
+  </div><!-- /stage1 -->
+
+  <div id="stage2" style="display:none"></div>
 
   <footer>
     Приз лидеру группового этапа — 10% банка. Итог турнира (Раунды 1+2): топ-3 делят 85% в пропорции 45% · 25% · 15%.<br>
@@ -229,6 +248,8 @@ TEAMS.forEach(t=>TEAM_BACKERS[t]=PLAYERS.filter(p=>BETS[p].some(b=>b[0]===t)).le
 
 let LIVE={teams:{},updatedAt:null,matches:0};
 const PTS={'W':3,'D':1,'L':0,'':0};
+const BETS_R2={}; // ставки Этапа 2 (плей-офф) — заполнить после группового этапа
+const STAGE_COEF={LAST_32:1.5,LAST_16:2.5,QUARTER_FINALS:4,SEMI_FINALS:6,FINAL:9};
 function liveOf(t){return (LIVE.teams&&LIVE.teams[t])||['','',''];}
 function teamPoints(t){return liveOf(t).reduce((s,r)=>s+PTS[r],0);}
 function teamPlayed(t){return liveOf(t).filter(r=>r!=='').length;}
@@ -261,8 +282,26 @@ function avatarStyle(name,size,fs,ring){
 }
 function srBg(s){return s==null?'background:rgba(255,255,255,.06);color:var(--mut2)':`background:hsl(${(s*1.2).toFixed(0)} 58% 40%);color:#fff`;}
 
+// --- Этап 2 (плей-офф) ---
+function r1CoinsOf(p,team){const b=(BETS[p]||[]).find(x=>x[0]===team);return b?b[1]:null;}
+function playoffStagePts(team){const ps=(LIVE.playoff&&LIVE.playoff[team])||{};let s=0;for(const st in STAGE_COEF){if(ps[st]!=null)s+=ps[st]*STAGE_COEF[st];}return s;}
+function playerScoreR2(p){
+  let total2=0;const lines=[];
+  for(const [team,coins] of (BETS_R2[p]||[])){
+    const cl=TEAM_CLUSTER[team]||'A';const coef=CLUSTER_COEF[cl];
+    const loyalty=(r1CoinsOf(p,team)===coins)?1.5:1;
+    const sp=playoffStagePts(team);
+    const contrib=coins*coef*loyalty*sp;total2+=contrib;
+    lines.push({team,coins,cl,coef,loyalty,sp,contrib});
+  }
+  lines.sort((a,b)=>b.contrib-a.contrib||b.coins-a.coins);
+  return {total2,lines};
+}
+function combinedTotal(p){return playerScore(p).total+playerScoreR2(p).total2;}
+
 let firstRender=true;
 let openP=null;
+let openP2=null;
 
 function renderPodium(){
   const d=sorted();
@@ -363,7 +402,72 @@ function renderTeams(){
   document.getElementById('teams').innerHTML=html;
 }
 
-function renderAll(){renderStats();renderPodium();renderBoard();renderTeams();firstRender=false;}
+function renderStage2(){
+  const el=document.getElementById('stage2');
+  if(Object.keys(BETS_R2).length===0){
+    el.innerHTML=`<div class="stage-empty">
+      <div style="font-family:var(--disp);font-size:20px;font-weight:700;margin-bottom:8px">Этап 2 · Плей-офф</div>
+      <p style="color:var(--mut);font-size:13.5px;line-height:1.6;margin:0">Ставки появятся после группового этапа (дедлайн 28 июня, 21:00 МСК). Результаты плей-офф подтянутся автоматически.</p>
+      <div class="memo">
+        <div class="mc"><div class="mh">Очки матча</div><div class="mb">Победа в осн. время — 3, в ОТ/пенальти — 2, поражение в ОТ/пенальти — 1, в осн. время — 0.</div></div>
+        <div class="mc"><div class="mh">Коэф. стадий</div><div class="mb">1/16 — ×1.5 · 1/8 — ×2.5 · 1/4 — ×4 · 1/2 — ×6 · финал — ×9.</div></div>
+        <div class="mc"><div class="mh">Бонус лояльности</div><div class="mb">×1.5 ко всем очкам команды, если ставка повторяет Этап 1 (то же число монет).</div></div>
+        <div class="mc"><div class="mh">Призовой фонд</div><div class="mb">Итог Р1+Р2: топ-3 делят 85% банка — 45% (${rub(Math.round(BANK*0.45))}) · 25% (${rub(Math.round(BANK*0.25))}) · 15% (${rub(Math.round(BANK*0.15))}).</div></div>
+      </div></div>`;
+    return;
+  }
+  const data=PLAYERS.map(p=>{const r2=playerScoreR2(p);const r1=playerScore(p).total;return {p,r2,r1,comb:r1+r2.total2};}).sort((a,b)=>b.comb-a.comb);
+  const podOrder=[{d:data[1],pos:2,cls:'p2',label:'SILVER',ring:'#cbd5e1',av:64,fs:21},{d:data[0],pos:1,cls:'p1',label:'',ring:'var(--gold)',av:80,fs:27},{d:data[2],pos:3,cls:'p3',label:'BRONZE',ring:'#d9914a',av:64,fs:21}];
+  const podium=podOrder.map(c=>{if(!c.d)return '';const top=c.pos===1?'<div class="leadtab">ЛИДЕР</div>':`<div class="plabel">${c.label}</div>`;const mb=c.pos===1?14:12;return `<div class="pod ${c.cls}">${top}<div class="num">${c.pos}</div><div class="avatar" style="${avatarStyle(c.d.p,c.av,c.fs,c.ring)};margin:0 auto ${mb}px">${initials(c.d.p)}</div><div class="pname">${c.d.p}</div><div class="ppts">${fmt2(c.d.comb)}</div><div class="punit">ИТОГ Р1+Р2</div></div>`;}).join('');
+  const pm=LIVE.playoffMatches||0;const leader=data[0];
+  const stats=[
+    {label:'Лидер итога',val:leader?leader.p:'—',sub:leader?`${fmt2(leader.comb)} очк (Р1+Р2)`:'—',tick:'var(--gold)'},
+    {label:'Сыграно плей-офф',val:`${pm} / 31`,sub:'матчей нокаут-стадий',tick:'var(--cyan)'},
+    {label:'Бонус лояльности',val:'×1.5',sub:'за повтор ставки Этапа 1',tick:'var(--lime)'},
+    {label:'Призовой фонд',val:'45/25/15%',sub:`${rub(Math.round(BANK*0.45))} · ${rub(Math.round(BANK*0.25))} · ${rub(Math.round(BANK*0.15))}`,tick:'var(--gold)'},
+  ];
+  const statsHtml=stats.map(c=>`<div class="stat"><div class="tick" style="background:${c.tick}"></div><div class="slabel">${c.label}</div><div class="sval">${c.val}</div><div class="ssub">${c.sub}</div></div>`).join('');
+  const gcols='grid-template-columns:minmax(0,1.5fr) 46px 46px 46px 60px 64px';
+  const rows=data.map((o,i)=>{
+    const rank=i+1;const medal=rank===1?'var(--gold)':rank===2?'#cbd5e1':rank===3?'#d9914a':'var(--mut2)';
+    const det=`<div class="detail"><div class="dh" style="${gcols}"><span>Команда</span><span>Монеты</span><span>Коэф</span><span>Лоял</span><span>Очки</span><span>Вклад</span></div>`+
+      (o.r2.lines.length?o.r2.lines.map(l=>`<div class="tline" style="${gcols}">
+        <span class="tn"><span class="clb" style="background:${CLUSTER_COLOR[l.cl]}">${l.cl}</span><span class="nm2">${l.team}</span></span>
+        <span class="col">${l.coins}</span><span class="col">×${l.coef.toFixed(2)}</span>
+        <span class="col">${l.loyalty===1.5?'×1.5':'—'}</span>
+        <span class="col">${fmt2(l.sp)}</span>
+        <span class="contrib">${fmt2(l.contrib)}</span></div>`).join('')
+        :`<div style="color:var(--mut2);font-size:12px;padding:6px 4px">Нет ставок Этапа 2</div>`)+`</div>`;
+    return `<div class="row ${rank===1?'g1':''} ${openP2===o.p?'open':''}" data-p2="${o.p}">
+      <div class="rhead">
+        <div class="rank" style="color:${medal}">${rank}</div>
+        <div class="avatar" style="${avatarStyle(o.p,34,13,null)}">${initials(o.p)}</div>
+        <div class="who"><div class="nm">${o.p}</div><div class="tt">плей-офф: ${(BETS_R2[o.p]||[]).length} команд</div></div>
+        <div style="flex:1"></div>
+        <div class="score" style="flex:0 0 86px"><div class="v" style="font-size:17px;color:var(--cyan)">${fmt2(o.r2.total2)}</div><div class="u">ЭТАП 2</div></div>
+        <div class="score" style="flex:0 0 100px"><div class="v">${fmt2(o.comb)}</div><div class="u">ИТОГ Р1+Р2</div></div>
+        <div class="chev">›</div></div>${det}</div>`;
+  }).join('');
+  el.innerHTML=`<div class="podium">${podium}</div>
+    <div class="stats">${statsHtml}</div>
+    <div class="colhdr"><span class="dot" style="background:var(--gold);box-shadow:0 0 12px var(--gold)"></span><h2>Общий зачёт · Р1 + Р2</h2>
+      <span class="hint">сортировка по итогу · клик — портфель плей-офф</span></div>
+    <div class="board">${rows}</div>
+    <div class="legend" style="margin-top:10px">
+      <span>1/16 ×1.5</span><span>1/8 ×2.5</span><span>1/4 ×4</span><span>1/2 ×6</span><span>финал ×9</span></div>`;
+  el.querySelectorAll('.row').forEach(r=>{r.querySelector('.rhead').onclick=()=>{const p=r.dataset.p2;openP2=openP2===p?null:p;renderStage2();};});
+}
+
+function renderAll(){renderStats();renderPodium();renderBoard();renderTeams();renderStage2();firstRender=false;}
+
+function setStage(s){
+  document.getElementById('stage1').style.display=s==='2'?'none':'';
+  document.getElementById('stage2').style.display=s==='2'?'':'none';
+  document.getElementById('tab1').classList.toggle('active',s!=='2');
+  document.getElementById('tab2').classList.toggle('active',s==='2');
+}
+document.getElementById('tab1').onclick=()=>setStage('1');
+document.getElementById('tab2').onclick=()=>setStage('2');
 
 function setLive(on){
   const box=document.getElementById('liveBox');const txt=document.getElementById('liveTxt');

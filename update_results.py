@@ -9,26 +9,41 @@ import json, os, sys, datetime, urllib.request, urllib.error
 COMP = "WC"
 TOKEN = os.environ.get("FOOTBALL_DATA_TOKEN", "").strip()
 
-# FIFA three-letter code -> русское имя (как в ставках)
+# FIFA three-letter code -> русское имя (все 48 команд ЧМ-2026)
 TLA = {
-    "FRA": "Франция", "ENG": "Англия", "ESP": "Испания", "POR": "Португалия",
-    "ARG": "Аргентина", "BRA": "Бразилия", "NED": "Нидерланды", "BEL": "Бельгия",
-    "GER": "Германия", "NOR": "Норвегия", "MAR": "Марокко", "JPN": "Япония",
-    "SUI": "Швейцария", "URU": "Уругвай", "CIV": "Кот-д'Ивуар", "GHA": "Гана",
-    "BIH": "Босния и Герцеговина", "TUR": "Турция", "AUT": "Австрия", "ALG": "Алжир",
-    "IRN": "Иран", "ECU": "Эквадор", "SCO": "Шотландия", "CAN": "Канада", "UZB": "Узбекистан",
+    "FRA": "Франция", "ESP": "Испания", "ARG": "Аргентина", "ENG": "Англия", "POR": "Португалия",
+    "BRA": "Бразилия", "NED": "Нидерланды", "MAR": "Марокко", "BEL": "Бельгия", "GER": "Германия",
+    "CRO": "Хорватия", "COL": "Колумбия", "SEN": "Сенегал", "MEX": "Мексика", "USA": "США",
+    "URU": "Уругвай", "NOR": "Норвегия", "CAN": "Канада", "EGY": "Египет", "ALG": "Алжир",
+    "AUS": "Австралия", "KOR": "Южная Корея", "AUT": "Австрия", "ECU": "Эквадор", "TUR": "Турция",
+    "IRN": "Иран", "SUI": "Швейцария", "JPN": "Япония",
+    "CIV": "Кот-д'Ивуар", "PAN": "Панама", "PAR": "Парагвай", "SWE": "Швеция", "SCO": "Шотландия",
+    "CZE": "Чехия", "COD": "ДР Конго", "TUN": "Тунис",
+    "BIH": "Босния и Герцеговина", "JOR": "Иордания", "KSA": "Саудовская Аравия", "RSA": "ЮАР",
+    "IRQ": "Ирак", "QAT": "Катар", "UZB": "Узбекистан",
+    "CPV": "Кабо-Верде", "GHA": "Гана", "CUW": "Кюрасао", "HAI": "Гаити", "NZL": "Новая Зеландия",
 }
 NAME = {
-    "france": "Франция", "england": "Англия", "spain": "Испания", "portugal": "Португалия",
-    "argentina": "Аргентина", "brazil": "Бразилия", "netherlands": "Нидерланды", "belgium": "Бельгия",
-    "germany": "Германия", "norway": "Норвегия", "morocco": "Марокко", "japan": "Япония",
-    "switzerland": "Швейцария", "uruguay": "Уругвай", "côte d'ivoire": "Кот-д'Ивуар",
-    "cote d'ivoire": "Кот-д'Ивуар", "ivory coast": "Кот-д'Ивуар", "ghana": "Гана",
+    "france": "Франция", "spain": "Испания", "argentina": "Аргентина", "england": "Англия",
+    "portugal": "Португалия", "brazil": "Бразилия", "netherlands": "Нидерланды", "morocco": "Марокко",
+    "belgium": "Бельгия", "germany": "Германия", "croatia": "Хорватия", "colombia": "Колумбия",
+    "senegal": "Сенегал", "mexico": "Мексика", "united states": "США", "usa": "США",
+    "uruguay": "Уругвай", "norway": "Норвегия", "canada": "Канада", "egypt": "Египет", "algeria": "Алжир",
+    "australia": "Австралия", "korea republic": "Южная Корея", "south korea": "Южная Корея",
+    "austria": "Австрия", "ecuador": "Эквадор", "turkey": "Турция", "türkiye": "Турция",
+    "turkiye": "Турция", "iran": "Иран", "ir iran": "Иран", "switzerland": "Швейцария", "japan": "Япония",
+    "côte d'ivoire": "Кот-д'Ивуар", "cote d'ivoire": "Кот-д'Ивуар", "ivory coast": "Кот-д'Ивуар",
+    "panama": "Панама", "paraguay": "Парагвай", "sweden": "Швеция", "scotland": "Шотландия",
+    "czechia": "Чехия", "czech republic": "Чехия", "congo dr": "ДР Конго", "dr congo": "ДР Конго",
+    "democratic republic of congo": "ДР Конго", "tunisia": "Тунис",
     "bosnia and herzegovina": "Босния и Герцеговина", "bosnia-herzegovina": "Босния и Герцеговина",
-    "turkey": "Турция", "türkiye": "Турция", "turkiye": "Турция", "austria": "Австрия",
-    "algeria": "Алжир", "iran": "Иран", "ir iran": "Иран", "ecuador": "Эквадор",
-    "scotland": "Шотландия", "canada": "Канада", "uzbekistan": "Узбекистан",
+    "jordan": "Иордания", "saudi arabia": "Саудовская Аравия", "south africa": "ЮАР", "iraq": "Ирак",
+    "qatar": "Катар", "uzbekistan": "Узбекистан", "cape verde": "Кабо-Верде", "cabo verde": "Кабо-Верде",
+    "ghana": "Гана", "curacao": "Кюрасао", "curaçao": "Кюрасао", "haiti": "Гаити", "new zealand": "Новая Зеландия",
 }
+
+# стадии плей-офф (как их называет football-data)
+PLAYOFF_STAGES = ("LAST_32", "LAST_16", "QUARTER_FINALS", "SEMI_FINALS", "FINAL")
 
 def ru_name(team):
     tla = (team.get("tla") or "").upper()
@@ -44,29 +59,48 @@ def fetch_matches():
 
 def compute():
     data = fetch_matches()
-    per = {}
-    done = 0
+    per = {}          # группа: команда -> [(дата, W/D/L), ...]
+    playoff = {}      # плей-офф: команда -> {стадия: очки}
+    done = 0          # сыграно матчей группы
+    pdone = 0         # сыграно матчей плей-офф (учитываемых стадий)
     for m in data.get("matches", []):
-        if m.get("stage", "") not in ("GROUP_STAGE", "GROUP"):
-            continue
+        stage = m.get("stage", "")
         if m.get("status") != "FINISHED":
             continue
-        done += 1
-        winner = (m.get("score") or {}).get("winner")
-        date = m.get("utcDate", "")
-        for team, side in ((m.get("homeTeam", {}), "HOME"), (m.get("awayTeam", {}), "AWAY")):
-            name = ru_name(team)
-            if not name:
-                continue
-            if winner == "DRAW":
-                res = "D"
-            elif winner == "%s_TEAM" % side:
-                res = "W"
-            elif winner in ("HOME_TEAM", "AWAY_TEAM"):
-                res = "L"
-            else:
-                continue
-            per.setdefault(name, []).append((date, res))
+        score = m.get("score") or {}
+        winner = score.get("winner")
+        ht, at = m.get("homeTeam", {}), m.get("awayTeam", {})
+        if stage in ("GROUP_STAGE", "GROUP"):
+            done += 1
+            date = m.get("utcDate", "")
+            for team, side in ((ht, "HOME"), (at, "AWAY")):
+                name = ru_name(team)
+                if not name:
+                    continue
+                if winner == "DRAW":
+                    res = "D"
+                elif winner == "%s_TEAM" % side:
+                    res = "W"
+                elif winner in ("HOME_TEAM", "AWAY_TEAM"):
+                    res = "L"
+                else:
+                    continue
+                per.setdefault(name, []).append((date, res))
+        elif stage in PLAYOFF_STAGES:
+            pdone += 1
+            dur = score.get("duration", "REGULAR")  # REGULAR / EXTRA_TIME / PENALTY_SHOOTOUT
+            for team, side in ((ht, "HOME"), (at, "AWAY")):
+                name = ru_name(team)
+                if not name:
+                    continue
+                if winner not in ("HOME_TEAM", "AWAY_TEAM"):
+                    continue
+                iswin = (winner == "%s_TEAM" % side)
+                if dur == "REGULAR":
+                    pts = 3 if iswin else 0
+                else:
+                    pts = 2 if iswin else 1  # ОТ или пенальти
+                playoff.setdefault(name, {})[stage] = pts
     teams = {}
     for name, lst in per.items():
         lst.sort(key=lambda x: x[0])
@@ -75,8 +109,9 @@ def compute():
             slots[i] = r
         teams[name] = slots
     msk = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)
-    return {"teams": teams, "updatedAt": msk.strftime("%H:%M:%S"),
-            "date": msk.strftime("%Y-%m-%d"), "matches": done}
+    return {"teams": teams, "playoff": playoff,
+            "updatedAt": msk.strftime("%H:%M:%S"), "date": msk.strftime("%Y-%m-%d"),
+            "matches": done, "playoffMatches": pdone}
 
 def main():
     if not TOKEN:
@@ -85,7 +120,9 @@ def main():
     payload = compute()
     with open("results.json", "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
-    print("OK: %d сыгранных матчей, %d команд" % (payload["matches"], len(payload["teams"])))
+    print("OK: группа %d матчей (%d команд), плей-офф %d матчей (%d команд)" % (
+        payload["matches"], len(payload["teams"]),
+        payload["playoffMatches"], len(payload["playoff"])))
 
 if __name__ == "__main__":
     main()
