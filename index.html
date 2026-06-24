@@ -517,9 +517,12 @@ function setStage(s){
   document.getElementById('stage2').style.display=s==='2'?'':'none';
   document.getElementById('tab1').classList.toggle('active',s!=='2');
   document.getElementById('tab2').classList.toggle('active',s==='2');
+  try{localStorage.setItem('wc_stage',s);}catch(e){}
 }
 document.getElementById('tab1').onclick=()=>setStage('1');
 document.getElementById('tab2').onclick=()=>setStage('2');
+let _savedStage='1';try{_savedStage=localStorage.getItem('wc_stage')||'1';}catch(e){}
+setStage(_savedStage);
 
 function setLive(on){
   const box=document.getElementById('liveBox');const txt=document.getElementById('liveTxt');
