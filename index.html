@@ -435,7 +435,7 @@ function renderStage2(){
   const pm=LIVE.playoffMatches||0;const leader=data[0];
   const stats=[
     {label:'Лидер итога',val:leader?leader.p:'—',sub:leader?`${fmt2(leader.comb)} очк (Р1+Р2)`:'—',tick:'var(--gold)'},
-    {label:'Сыграно плей-офф',val:`${pm} / 31`,sub:'матчей нокаут-стадий',tick:'var(--cyan)'},
+    {label:'Сыграно плей-офф',val:`${pm} / 32`,sub:'матчей нокаут-стадий',tick:'var(--cyan)'},
     {label:'Бонус лояльности',val:'×1.5',sub:'за повтор ставки Этапа 1',tick:'var(--lime)'},
     {label:'Призовой фонд',val:'45/25/15%',sub:`${rub(Math.round(BANK*0.45))} · ${rub(Math.round(BANK*0.25))} · ${rub(Math.round(BANK*0.15))}`,tick:'var(--gold)'},
   ];
