@@ -241,9 +241,16 @@
    "D"
   ]
  },
- "playoff": {},
- "updatedAt": "23:03:45",
- "date": "2026-06-28",
+ "playoff": {
+  "ЮАР": {
+   "LAST_32": 0
+  },
+  "Канада": {
+   "LAST_32": 3
+  }
+ },
+ "updatedAt": "00:12:54",
+ "date": "2026-06-29",
  "matches": 72,
- "playoffMatches": 0
+ "playoffMatches": 1
 }
