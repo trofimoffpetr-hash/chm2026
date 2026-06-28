@@ -262,9 +262,9 @@ const BETS_R2={
  "Рубен":[["Испания",93],["Франция",1],["Англия",1],["Аргентина",1],["Португалия",1],["Германия",1],["Бразилия",1],["Нидерланды",1]],
  "Панчо":[["Аргентина",40],["Бразилия",2],["Нидерланды",31],["Норвегия",5],["Канада",5],["США",5]]
 }; // ставки Этапа 2 (плей-офф)
-const STAGE_COEF={LAST_32:1.5,LAST_16:2.5,QUARTER_FINALS:4,SEMI_FINALS:6,FINAL:9};
-const STAGE_ORDER=['LAST_32','LAST_16','QUARTER_FINALS','SEMI_FINALS','FINAL'];
-const STAGE_SHORT={LAST_32:'1/16',LAST_16:'1/8',QUARTER_FINALS:'1/4',SEMI_FINALS:'1/2',FINAL:'Ф'};
+const STAGE_COEF={LAST_32:1.5,LAST_16:2.5,QUARTER_FINALS:4,SEMI_FINALS:6,THIRD_PLACE:6,FINAL:9};
+const STAGE_ORDER=['LAST_32','LAST_16','QUARTER_FINALS','SEMI_FINALS','THIRD_PLACE','FINAL'];
+const STAGE_SHORT={LAST_32:'1/16',LAST_16:'1/8',QUARTER_FINALS:'1/4',SEMI_FINALS:'1/2',THIRD_PLACE:'3-е',FINAL:'Ф'};
 function liveOf(t){return (LIVE.teams&&LIVE.teams[t])||['','',''];}
 function teamPoints(t){return liveOf(t).reduce((s,r)=>s+PTS[r],0);}
 function teamPlayed(t){return liveOf(t).filter(r=>r!=='').length;}
@@ -301,7 +301,7 @@ function srBg(s){return s==null?'background:rgba(255,255,255,.06);color:var(--mu
 function r1CoinsOf(p,team){const b=(BETS[p]||[]).find(x=>x[0]===team);return b?b[1]:null;}
 function playoffStagePts(team){const ps=(LIVE.playoff&&LIVE.playoff[team])||{};let s=0;for(const st in STAGE_COEF){if(ps[st]!=null)s+=ps[st]*STAGE_COEF[st];}return s;}
 function playerScoreR2(p){
-  let total2=0;const lines=[];const stagePts={LAST_32:0,LAST_16:0,QUARTER_FINALS:0,SEMI_FINALS:0,FINAL:0};
+  let total2=0;const lines=[];const stagePts={};STAGE_ORDER.forEach(s=>stagePts[s]=0);
   for(const [team,coins] of (BETS_R2[p]||[])){
     const cl=TEAM_CLUSTER[team]||'A';const coef=CLUSTER_COEF[cl];
     const loyalty=(r1CoinsOf(p,team)===coins)?1.5:1;
@@ -425,7 +425,7 @@ function renderStage2(){
   const banner=noBets?`<div class="s2note">Ставки Этапа 2 ещё не внесены — показан текущий общий зачёт по Этапу 1 (очки плей-офф = 0). Портфели плей-офф и результаты стадий появятся автоматически, как только добавлю ставки (дедлайн 28 июня, 21:00 МСК).</div>`:'';
   const memo=noBets?`<div class="memo" style="margin-top:22px">
         <div class="mc"><div class="mh">Очки матча</div><div class="mb">Победа в осн. время — 3, в ОТ/пенальти — 2, поражение в ОТ/пенальти — 1, в осн. время — 0.</div></div>
-        <div class="mc"><div class="mh">Коэф. стадий</div><div class="mb">1/16 — ×1.5 · 1/8 — ×2.5 · 1/4 — ×4 · 1/2 — ×6 · финал — ×9.</div></div>
+        <div class="mc"><div class="mh">Коэф. стадий</div><div class="mb">1/16 — ×1.5 · 1/8 — ×2.5 · 1/4 — ×4 · 1/2 — ×6 · матч за 3-е — ×6 · финал — ×9.</div></div>
         <div class="mc"><div class="mh">Бонус лояльности</div><div class="mb">×1.5 ко всем очкам команды, если ставка повторяет Этап 1 (то же число монет).</div></div>
         <div class="mc"><div class="mh">Призовой фонд</div><div class="mb">Итог Р1+Р2: топ-3 делят 85% банка — 45% (${rub(Math.round(BANK*0.45))}) · 25% (${rub(Math.round(BANK*0.25))}) · 15% (${rub(Math.round(BANK*0.15))}).</div></div>
       </div>`:'';
@@ -503,7 +503,7 @@ function renderStage2(){
       <div>
         <div class="colhdr"><span class="dot" style="background:var(--cyan);box-shadow:0 0 12px var(--cyan)"></span><h2>Результаты плей-офф</h2>
           <button class="exportbtn" id="exportBtn2" style="margin-left:auto">↓ ЭКСПОРТ CSV</button></div>
-        <div class="legend"><span>1/16 ×1.5</span><span>1/8 ×2.5</span><span>1/4 ×4</span><span>1/2 ×6</span><span>финал ×9</span></div>
+        <div class="legend"><span>1/16 ×1.5</span><span>1/8 ×2.5</span><span>1/4 ×4</span><span>1/2 ×6</span><span>3-е ×6</span><span>финал ×9</span></div>
         ${panel}
       </div>
     </div>${memo}`;

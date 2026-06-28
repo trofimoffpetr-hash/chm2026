@@ -86,7 +86,7 @@ def compute():
                 else:
                     continue
                 per.setdefault(name, []).append((date, res))
-        elif stage in PLAYOFF_STAGES:
+        elif stage in PLAYOFF_STAGES or stage == "THIRD_PLACE":
             pdone += 1
             dur = score.get("duration", "REGULAR")  # REGULAR / EXTRA_TIME / PENALTY_SHOOTOUT
             for team, side in ((ht, "HOME"), (at, "AWAY")):
@@ -101,8 +101,6 @@ def compute():
                 else:
                     pts = 2 if iswin else 1  # ОТ или пенальти
                 playoff.setdefault(name, {})[stage] = pts
-        elif stage == "THIRD_PLACE":
-            pdone += 1  # учитываем в счётчике матчей, но очки за матч за 3-е место не начисляются
     teams = {}
     for name, lst in per.items():
         lst.sort(key=lambda x: x[0])
