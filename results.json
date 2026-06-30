@@ -265,10 +265,16 @@
   },
   "Марокко": {
    "LAST_32": 2
+  },
+  "Кот-д'Ивуар": {
+   "LAST_32": 0
+  },
+  "Норвегия": {
+   "LAST_32": 3
   }
  },
- "updatedAt": "20:28:17",
+ "updatedAt": "22:17:09",
  "date": "2026-06-30",
  "matches": 72,
- "playoffMatches": 4
+ "playoffMatches": 5
 }
