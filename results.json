@@ -271,10 +271,16 @@
   },
   "Норвегия": {
    "LAST_32": 3
+  },
+  "Франция": {
+   "LAST_32": 3
+  },
+  "Швеция": {
+   "LAST_32": 0
   }
  },
- "updatedAt": "01:23:19",
+ "updatedAt": "02:40:27",
  "date": "2026-07-01",
  "matches": 72,
- "playoffMatches": 5
+ "playoffMatches": 6
 }
