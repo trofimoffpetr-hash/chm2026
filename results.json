@@ -289,10 +289,16 @@
   },
   "ДР Конго": {
    "LAST_32": 0
+  },
+  "Бельгия": {
+   "LAST_32": 2
+  },
+  "Сенегал": {
+   "LAST_32": 1
   }
  },
- "updatedAt": "01:13:50",
+ "updatedAt": "02:42:22",
  "date": "2026-07-02",
  "matches": 72,
- "playoffMatches": 8
+ "playoffMatches": 9
 }
