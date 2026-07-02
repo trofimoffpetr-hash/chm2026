@@ -295,10 +295,16 @@
   },
   "Сенегал": {
    "LAST_32": 0
+  },
+  "США": {
+   "LAST_32": 3
+  },
+  "Босния и Герцеговина": {
+   "LAST_32": 0
   }
  },
- "updatedAt": "04:36:00",
+ "updatedAt": "08:39:46",
  "date": "2026-07-02",
  "matches": 72,
- "playoffMatches": 9
+ "playoffMatches": 10
 }
