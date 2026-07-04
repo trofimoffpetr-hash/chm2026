@@ -319,10 +319,16 @@
   },
   "Алжир": {
    "LAST_32": 0
+  },
+  "Аргентина": {
+   "LAST_32": 2
+  },
+  "Кабо-Верде": {
+   "LAST_32": 1
   }
  },
- "updatedAt": "02:33:23",
+ "updatedAt": "04:10:20",
  "date": "2026-07-04",
  "matches": 72,
- "playoffMatches": 14
+ "playoffMatches": 15
 }
