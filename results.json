@@ -325,10 +325,16 @@
   },
   "Кабо-Верде": {
    "LAST_32": 1
+  },
+  "Колумбия": {
+   "LAST_32": 3
+  },
+  "Гана": {
+   "LAST_32": 0
   }
  },
- "updatedAt": "04:10:20",
+ "updatedAt": "07:48:11",
  "date": "2026-07-04",
  "matches": 72,
- "playoffMatches": 15
+ "playoffMatches": 16
 }
