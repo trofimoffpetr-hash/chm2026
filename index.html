@@ -41,6 +41,8 @@
   .logo .shine{position:absolute;inset:0;background:linear-gradient(115deg,transparent 46%,rgba(255,255,255,.14) 50%,transparent 54%)}
   .htitle{font-family:var(--disp);font-size:26px;font-weight:700;letter-spacing:-.6px;line-height:1.05}
   .hsub{color:var(--mut);font-size:12.5px;margin-top:5px;font-weight:600;font-family:var(--mono);letter-spacing:.2px}
+  .livewrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .lastm{font-family:var(--mono);font-size:11px;color:var(--mut2);text-align:right;max-width:360px}
   .live{display:flex;align-items:center;gap:9px;border:1px solid var(--line);padding:9px 14px;border-radius:12px;background:var(--panel)}
   .live .led{width:9px;height:9px;border-radius:50%;background:var(--mut2)}
   .live.on .led{background:var(--lime);animation:pulse 2s infinite}
@@ -170,7 +172,10 @@
         <p class="hsub">РАУНД 1 — ГРУППОВОЙ ЭТАП · ПОРТФЕЛЬНЫЙ ПРОГНОЗ</p>
       </div>
     </div>
-    <div class="live off" id="liveBox"><span class="led"></span><span class="txt" id="liveTxt">Подключение…</span></div>
+    <div class="livewrap">
+      <div class="live off" id="liveBox"><span class="led"></span><span class="txt" id="liveTxt">Подключение…</span></div>
+      <div class="lastm" id="lastMatchTxt"></div>
+    </div>
   </header>
 
   <div class="tabs">
@@ -300,6 +305,19 @@ function srBg(s){return s==null?'background:rgba(255,255,255,.06);color:var(--mu
 // --- Этап 2 (плей-офф) ---
 function r1CoinsOf(p,team){const b=(BETS[p]||[]).find(x=>x[0]===team);return b?b[1]:null;}
 function playoffStagePts(team){const ps=(LIVE.playoff&&LIVE.playoff[team])||{};let s=0;for(const st in STAGE_COEF){if(ps[st]!=null)s+=ps[st]*STAGE_COEF[st];}return s;}
+// команда ещё «в игре» (не выбыла из нокаута)?
+function teamAlive(team){
+  const ko=LIVE.knockoutTeams;
+  if(Array.isArray(ko)&&ko.length>=16&&!ko.includes(team))return false; // не прошла из группы
+  const ps=(LIVE.playoff&&LIVE.playoff[team])||{};
+  if(ps.FINAL!=null||ps.THIRD_PLACE!=null)return false;                 // турнир окончен
+  for(const st of ['LAST_32','LAST_16','QUARTER_FINALS']){
+    if(ps[st]!=null&&ps[st]<=1)return false;                            // поражение (0 осн. / 1 ОТ-пен)
+  }
+  return true;
+}
+// сумма монет Э2 игрока на командах, ещё оставшихся в игре
+function coinsInPlay(p){let s=0;for(const [team,coins] of (BETS_R2[p]||[])){if(teamAlive(team))s+=coins;}return s;}
 function playerScoreR2(p){
   let total2=0;const lines=[];const stagePts={};STAGE_ORDER.forEach(s=>stagePts[s]=0);
   for(const [team,coins] of (BETS_R2[p]||[])){
@@ -456,7 +474,7 @@ function renderStage2(){
       <div class="rhead">
         <div class="rank" style="color:${medal}">${rank}</div>
         <div class="avatar" style="${avatarStyle(o.p,34,13,null)}">${initials(o.p)}</div>
-        <div class="who"><div class="nm">${o.p}</div><div class="tt">плей-офф: ${(BETS_R2[o.p]||[]).length} команд</div></div>
+        <div class="who"><div class="nm">${o.p}</div><div class="tt">${coinsInPlay(o.p)} монет в игре</div></div>
         <div class="score" style="flex:0 0 56px"><div class="v" style="font-size:16px">${fmt2(o.r1)}</div><div class="u">ЭТАП 1</div></div>
         <div class="tours">${stg}</div>
         <div class="score" style="flex:0 0 62px"><div class="v" style="font-size:16px;color:var(--cyan)">${fmt2(o.r2.total2)}</div><div class="u">ЭТАП 2</div></div>
@@ -541,6 +559,8 @@ function setLive(on){
   const box=document.getElementById('liveBox');const txt=document.getElementById('liveTxt');
   box.classList.toggle('on',on);box.classList.toggle('off',!on);
   txt.textContent=on?`LIVE · ${LIVE.updatedAt} · ${LIVE.matches} матчей`:'Нет связи — обновится автоматически';
+  const lm=document.getElementById('lastMatchTxt');
+  if(lm)lm.textContent=(on&&LIVE.lastMatch)?('Посл. матч: '+(LIVE.lastMatchStage?LIVE.lastMatchStage+' · ':'')+LIVE.lastMatch):'';
 }
 
 async function poll(){
