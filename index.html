@@ -577,10 +577,11 @@ document.getElementById('tab2').onclick=()=>setStage('2');
 let _savedStage='1';try{_savedStage=localStorage.getItem('wc_stage')||'1';}catch(e){}
 setStage(_savedStage);
 
+let lastCheck='';
 function setLive(on){
   const box=document.getElementById('liveBox');const txt=document.getElementById('liveTxt');
   box.classList.toggle('on',on);box.classList.toggle('off',!on);
-  txt.textContent=on?`LIVE · ${LIVE.updatedAt} · ${LIVE.matches} матчей`:'Нет связи — обновится автоматически';
+  txt.textContent=on?`LIVE · проверено ${lastCheck} · ${LIVE.matches} матчей`:'Нет связи — обновится автоматически';
   const lm=document.getElementById('lastMatchTxt');
   if(lm)lm.textContent=(on&&LIVE.lastMatch)?('Посл. матч: '+(LIVE.lastMatchStage?LIVE.lastMatchStage+' · ':'')+LIVE.lastMatch):'';
 }
@@ -589,7 +590,7 @@ async function poll(){
   try{
     const r=await fetch('results.json?t='+Date.now(),{cache:'no-store'});
     if(!r.ok)throw 0;
-    LIVE=await r.json();setLive(true);renderAll();
+    LIVE=await r.json();lastCheck=new Date().toLocaleTimeString('ru-RU');setLive(true);renderAll();
   }catch(e){setLive(false);}
 }
 

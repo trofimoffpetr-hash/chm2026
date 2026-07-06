@@ -155,9 +155,23 @@ def main():
         print("Нет FOOTBALL_DATA_TOKEN", file=sys.stderr)
         sys.exit(1)
     payload = compute()
+    # Переписываем results.json только если изменились содержательные данные (не просто время).
+    # Иначе частый опрос давал бы коммит каждые пару минут → GitHub Pages упёрся бы в лимит
+    # ~10 сборок/час и обновления бы, наоборот, тормозили. Время (updatedAt) = момент
+    # последнего РЕАЛЬНОГО изменения; «свежесть проверки» страница показывает по своим часам.
+    meaningful = ("teams", "playoff", "matches", "playoffMatches",
+                  "lastMatch", "lastMatchStage", "knockoutTeams")
+    try:
+        with open("results.json", encoding="utf-8") as f:
+            old = json.load(f)
+    except (OSError, ValueError):
+        old = None
+    if old is not None and all(old.get(k) == payload.get(k) for k in meaningful):
+        print("Без изменений — файл не трогаем (коммита не будет)")
+        return
     with open("results.json", "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
-    print("OK: группа %d матчей (%d команд), плей-офф %d матчей (%d команд)" % (
+    print("Обновлено: группа %d матчей (%d команд), плей-офф %d матчей (%d команд)" % (
         payload["matches"], len(payload["teams"]),
         payload["playoffMatches"], len(payload["playoff"])))
 
