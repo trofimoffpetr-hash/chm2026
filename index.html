@@ -144,6 +144,15 @@
   .stage-empty{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px 22px;max-width:760px;margin:6px auto}
   .s2note{background:rgba(255,207,77,.08);border:1px solid rgba(255,207,77,.3);border-radius:12px;padding:12px 15px;font-size:13px;color:var(--mut);line-height:1.55;margin-bottom:18px}
 
+  /* Этап 2: 6 ячеек стадий не помещаются в один ряд рядом с Э1/Э2/Итог — переносим на отдельную строку */
+  #stage2 .rhead{flex-wrap:wrap}
+  #stage2 .tours{order:10;flex:1 0 100%;margin-top:6px}
+  #stage2 .rhead .who{flex:1 1 auto;min-width:120px}
+  .tline.dead{opacity:.5}
+  .tline .st{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;flex:0 0 auto;letter-spacing:.2px}
+  .tline .st.in{background:rgba(52,211,153,.16);color:#4ade80}
+  .tline .st.out{background:rgba(239,68,68,.14);color:#f87171}
+
   @media(max-width:900px){.grid{grid-template-columns:1fr}.colhdr .hint{display:none}}
   @media(max-width:560px){
     .wrap{padding:18px 12px 48px}
@@ -462,19 +471,19 @@ function renderStage2(){
   const rows=data.map((o,i)=>{
     const rank=i+1;const medal=rank===1?'var(--gold)':rank===2?'#cbd5e1':rank===3?'#d9914a':'var(--mut2)';
     const det=`<div class="detail"><div class="dh" style="${gcols}"><span>Команда</span><span>Монеты</span><span>Коэф</span><span>Лоял</span><span>Очки</span><span>Вклад</span></div>`+
-      (o.r2.lines.length?o.r2.lines.map(l=>`<div class="tline" style="${gcols}">
-        <span class="tn"><span class="clb" style="background:${CLUSTER_COLOR[l.cl]}">${l.cl}</span><span class="nm2">${l.team}</span></span>
+      (o.r2.lines.length?o.r2.lines.map(l=>{const al=teamAlive(l.team);return `<div class="tline ${al?'':'dead'}" style="${gcols}">
+        <span class="tn"><span class="clb" style="background:${CLUSTER_COLOR[l.cl]}">${l.cl}</span><span class="nm2">${l.team}</span><span class="st ${al?'in':'out'}">${al?'в игре':'вылет'}</span></span>
         <span class="col">${l.coins}</span><span class="col">×${l.coef.toFixed(2)}</span>
         <span class="col">${l.loyalty===1.5?'×1.5':'—'}</span>
         <span class="col">${fmt2(l.sp)}</span>
-        <span class="contrib">${fmt2(l.contrib)}</span></div>`).join('')
+        <span class="contrib">${fmt2(l.contrib)}</span></div>`;}).join('')
         :`<div style="color:var(--mut2);font-size:12px;padding:6px 4px">Нет ставок Этапа 2</div>`)+`</div>`;
     const stg=STAGE_ORDER.map(st=>{const v=o.r2.stagePts[st];return `<div class="tr"><span class="trl">${STAGE_SHORT[st]}</span><span class="trv">${v>0?fmt2(v):'—'}</span></div>`;}).join('');
     return `<div class="row ${rank===1?'g1':''} ${openP2===o.p?'open':''}" data-p2="${o.p}">
       <div class="rhead">
         <div class="rank" style="color:${medal}">${rank}</div>
         <div class="avatar" style="${avatarStyle(o.p,34,13,null)}">${initials(o.p)}</div>
-        <div class="who"><div class="nm">${o.p}</div><div class="tt">${coinsInPlay(o.p)} монет в игре</div></div>
+        <div class="who"><div class="nm">${o.p}</div><div class="tt">${(BETS_R2[o.p]||[]).filter(([t])=>teamAlive(t)).length}/${(BETS_R2[o.p]||[]).length} команд · ${coinsInPlay(o.p)} монет в игре</div></div>
         <div class="score" style="flex:0 0 56px"><div class="v" style="font-size:16px">${fmt2(o.r1)}</div><div class="u">ЭТАП 1</div></div>
         <div class="tours">${stg}</div>
         <div class="score" style="flex:0 0 62px"><div class="v" style="font-size:16px;color:var(--cyan)">${fmt2(o.r2.total2)}</div><div class="u">ЭТАП 2</div></div>
