@@ -311,13 +311,15 @@
    "LAST_32": 0
   },
   "Испания": {
-   "LAST_32": 3
+   "LAST_32": 3,
+   "LAST_16": 3
   },
   "Австрия": {
    "LAST_32": 0
   },
   "Португалия": {
-   "LAST_32": 3
+   "LAST_32": 3,
+   "LAST_16": 0
   },
   "Хорватия": {
    "LAST_32": 0
@@ -347,11 +349,11 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "22:02:19",
- "date": "2026-07-06",
+ "updatedAt": "00:55:22",
+ "date": "2026-07-07",
  "matches": 72,
- "playoffMatches": 20,
- "lastMatch": "Мексика 2:3 Англия",
+ "playoffMatches": 21,
+ "lastMatch": "Португалия 0:1 Испания",
  "lastMatchStage": "1/8",
  "knockoutTeams": [
   "Австралия",
