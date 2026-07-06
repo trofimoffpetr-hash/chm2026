@@ -458,7 +458,7 @@ function renderStage2(){
       </div>`:'';
   const data=PLAYERS.map(p=>{const r2=playerScoreR2(p);const r1=playerScore(p).total;return {p,r2,r1,comb:r1+r2.total2};}).sort((a,b)=>b.comb-a.comb);
   const podOrder=[{d:data[1],pos:2,cls:'p2',label:'SILVER',ring:'#cbd5e1',av:64,fs:21},{d:data[0],pos:1,cls:'p1',label:'',ring:'var(--gold)',av:80,fs:27},{d:data[2],pos:3,cls:'p3',label:'BRONZE',ring:'#d9914a',av:64,fs:21}];
-  const podium=podOrder.map(c=>{if(!c.d)return '';const top=c.pos===1?'<div class="leadtab">ЛИДЕР</div>':`<div class="plabel">${c.label}</div>`;const mb=c.pos===1?14:12;const pct=c.pos===1?0.45:c.pos===2?0.25:0.15;return `<div class="pod ${c.cls}">${top}<div class="num">${c.pos}</div><div class="avatar" style="${avatarStyle(c.d.p,c.av,c.fs,c.ring)};margin:0 auto ${mb}px">${initials(c.d.p)}</div><div class="pname">${c.d.p}</div><div class="ppts">${rub(Math.round(BANK*pct))}</div><div class="punit">ОЖИД. ВЫИГРЫШ</div></div>`;}).join('');
+  const podium=podOrder.map(c=>{if(!c.d)return '';const top=c.pos===1?'<div class="leadtab">ЛИДЕР</div>':`<div class="plabel">${c.label}</div>`;const mb=c.pos===1?14:12;const pct=c.pos===1?0.45:c.pos===2?0.25:0.15;return `<div class="pod ${c.cls}">${top}<div class="num">${c.pos}</div><div class="avatar" style="${avatarStyle(c.d.p,c.av,c.fs,c.ring)};margin:0 auto ${mb}px">${initials(c.d.p)}</div><div class="pname">${c.d.p}</div><div class="ppts">${fmt2(c.d.comb)}</div><div class="punit">${rub(Math.round(BANK*pct))}</div></div>`;}).join('');
   const pm=LIVE.playoffMatches||0;const leader=data[0];
   const stats=[
     {label:'Лидер итога',val:leader?leader.p:'—',sub:leader?`${fmt2(leader.comb)} очк (Р1+Р2)`:'—',tick:'var(--gold)'},
