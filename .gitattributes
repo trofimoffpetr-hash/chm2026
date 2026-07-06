@@ -1,0 +1,4 @@
+# Workflow / shell scripts must use LF so bash on the Ubuntu runner doesn't choke on CR
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
