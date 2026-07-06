@@ -79,7 +79,7 @@
   .colhdr{display:flex;align-items:center;gap:10px;margin:32px 0 14px}
   .colhdr .dot{width:9px;height:9px;border-radius:50%}
   .colhdr h2{font-family:var(--disp);font-size:18px;font-weight:600;letter-spacing:-.3px}
-  .colhdr .hint{font-family:var(--mono);color:var(--mut2);font-size:10.5px;font-weight:500;margin-left:auto;text-align:right;letter-spacing:.2px;max-width:54%}
+  .colhdr .hint{font-family:var(--mono);color:var(--mut2);font-size:10.5px;font-weight:500;margin-left:auto;text-align:right;letter-spacing:.2px;max-width:none;white-space:nowrap}
 
   .board{display:flex;flex-direction:column;gap:9px}
   .row{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:border-color .16s ease,transform .16s ease}
@@ -523,7 +523,7 @@ function renderStage2(){
     <div class="stats">${statsHtml}</div>
     <div class="grid">
       <div>
-        <div class="colhdr"><span class="dot" style="background:var(--gold);box-shadow:0 0 12px var(--gold)"></span><h2>Общий зачёт · Р1+Р2</h2>
+        <div class="colhdr"><span class="dot" style="background:var(--gold);box-shadow:0 0 12px var(--gold)"></span><h2>Общий зачёт</h2>
           <span class="hint">1/16…финал — очки Э2 по стадиям · Р1 · Э2 · Итог · клик — портфель</span></div>
         <div class="board">${rows}</div>
       </div>
