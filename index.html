@@ -153,6 +153,7 @@
   #stage2 .rhead{flex-wrap:wrap}
   #stage2 .tours{order:10;flex:1 0 100%;margin-top:6px}
   #stage2 .rhead .who{flex:1 1 auto;min-width:120px}
+  .pscores{display:contents}   /* на десктопе три блока очков — прямые дети .rhead (вид не меняется) */
   .tline .st{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
   .tline .st.in{background:#3ee37e;box-shadow:0 0 6px rgba(62,227,126,.6)}
   .tline .st.out{background:#ff5d6c;box-shadow:0 0 6px rgba(255,93,108,.55)}
@@ -174,6 +175,8 @@
     .who{flex:1 1 auto}
     .score{flex:0 0 64px}
     .tours{order:10;flex:1 0 100%;margin-top:2px}
+    /* Этап 2 на телефоне: очки Э1·Э2·Итог одной строкой под именем */
+    #stage2 .pscores{display:flex;flex:1 0 100%;order:5;gap:8px;margin-top:2px;justify-content:space-between}
     /* Этап 2: в раскрытом портфеле на телефоне прячем Коэф и Лоял, чтобы влезло имя команды */
     #stage2 .dh,#stage2 .tline{grid-template-columns:minmax(0,1fr) 44px 50px 56px!important;gap:8px!important}
     #stage2 .dh>span:nth-child(3),#stage2 .dh>span:nth-child(4),#stage2 .tline>:nth-child(3),#stage2 .tline>:nth-child(4){display:none!important}
@@ -494,11 +497,13 @@ function renderStage2(){
         <div class="rank" style="color:${medal}">${rank}</div>
         <div class="avatar" style="${avatarStyle(o.p,34,13,null)}">${initials(o.p)}</div>
         <div class="who"><div class="nm">${o.p}</div><div class="tt">${(BETS_R2[o.p]||[]).filter(([t])=>teamAlive(t)).length}/${(BETS_R2[o.p]||[]).length} команд · ${coinsInPlay(o.p)} монет в игре</div></div>
-        <div class="score" style="flex:0 0 56px"><div class="v" style="font-size:16px">${fmt2(o.r1)}</div><div class="u">ЭТАП 1</div></div>
-        <div class="tours">${stg}</div>
-        <div class="score" style="flex:0 0 62px"><div class="v" style="font-size:16px;color:var(--cyan)">${fmt2(o.r2.total2)}</div><div class="u">ЭТАП 2</div></div>
-        <div class="score" style="flex:0 0 72px"><div class="v">${fmt2(o.comb)}</div><div class="u">ИТОГ</div></div>
-        <div class="chev">›</div></div>${det}</div>`;
+        <div class="pscores">
+          <div class="score" style="flex:0 0 56px"><div class="v" style="font-size:16px">${fmt2(o.r1)}</div><div class="u">ЭТАП 1</div></div>
+          <div class="score" style="flex:0 0 62px"><div class="v" style="font-size:16px;color:var(--cyan)">${fmt2(o.r2.total2)}</div><div class="u">ЭТАП 2</div></div>
+          <div class="score" style="flex:0 0 72px"><div class="v">${fmt2(o.comb)}</div><div class="u">ИТОГ</div></div>
+        </div>
+        <div class="chev">›</div>
+        <div class="tours">${stg}</div></div>${det}</div>`;
   }).join('');
   // правая панель «Результаты плей-офф» (по командам ставок Этапа 2)
   const clnames={A:'Кластер A · ×1.00',B:'Кластер B · ×1.25',C:'Кластер C · ×1.50',D:'Кластер D · ×1.75',E:'Кластер E · ×2.00'};
