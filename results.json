@@ -285,13 +285,15 @@
    "LAST_32": 0
   },
   "Мексика": {
-   "LAST_32": 3
+   "LAST_32": 3,
+   "LAST_16": 0
   },
   "Эквадор": {
    "LAST_32": 0
   },
   "Англия": {
-   "LAST_32": 3
+   "LAST_32": 3,
+   "LAST_16": 3
   },
   "ДР Конго": {
    "LAST_32": 0
@@ -345,11 +347,11 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "03:16:17",
+ "updatedAt": "06:56:36",
  "date": "2026-07-06",
  "matches": 72,
- "playoffMatches": 19,
- "lastMatch": "Бразилия 1:2 Норвегия",
+ "playoffMatches": 20,
+ "lastMatch": "Мексика 2:3 Англия",
  "lastMatchStage": "1/8",
  "knockoutTeams": [
   "Австралия",
