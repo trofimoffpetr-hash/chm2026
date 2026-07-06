@@ -2,12 +2,14 @@ name: Update results
 
 on:
   schedule:
-    - cron: "*/5 * * * *"   # каждые ~5 минут (минимальный интервал GitHub)
+    - cron: "*/5 * * * *"   # перезапускает цепочку (GitHub всё равно троттлит расписание)
   workflow_dispatch:          # можно запускать вручную из вкладки Actions
 
 permissions:
   contents: write
 
+# Один активный поллер + максимум один в очереди. Когда текущий заканчивается,
+# сразу стартует следующий (созданный расписанием) — получается почти непрерывное обновление.
 concurrency:
   group: update-results
   cancel-in-progress: false
@@ -15,23 +17,30 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 310
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: Fetch & compute results
+      - name: Poll & commit (~5 часов, опрос каждые 2 минуты)
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
-        run: python update_results.py
-      - name: Commit if changed
         run: |
           git config user.name "wc-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add results.json
-          if git diff --staged --quiet; then
-            echo "Без изменений."
-          else
-            git commit -m "Авто-обновление результатов"
-            git push
-          fi
+          END=$((SECONDS + 18000))   # ~5 часов, укладываемся в timeout-minutes
+          while [ $SECONDS -lt $END ]; do
+            python update_results.py || echo "fetch failed, retry next tick"
+            git add results.json
+            if git diff --staged --quiet; then
+              echo "без изменений"
+            else
+              git commit -m "Авто-обновление результатов"
+              for i in 1 2 3; do
+                git pull --rebase --autostash origin main && git push && break
+                echo "push retry $i"; sleep 5
+              done
+            fi
+            sleep 120
+          done
