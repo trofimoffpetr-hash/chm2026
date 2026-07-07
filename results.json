@@ -336,10 +336,12 @@
    "LAST_32": 1
   },
   "Египет": {
-   "LAST_32": 2
+   "LAST_32": 2,
+   "LAST_16": 0
   },
   "Аргентина": {
-   "LAST_32": 2
+   "LAST_32": 2,
+   "LAST_16": 3
   },
   "Кабо-Верде": {
    "LAST_32": 1
@@ -351,11 +353,11 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "05:03:56",
+ "updatedAt": "21:11:07",
  "date": "2026-07-07",
  "matches": 72,
- "playoffMatches": 22,
- "lastMatch": "США 1:4 Бельгия",
+ "playoffMatches": 23,
+ "lastMatch": "Аргентина 3:2 Египет",
  "lastMatchStage": "1/8",
  "knockoutTeams": [
   "Австралия",
