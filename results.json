@@ -299,13 +299,15 @@
    "LAST_32": 0
   },
   "Бельгия": {
-   "LAST_32": 2
+   "LAST_32": 2,
+   "LAST_16": 3
   },
   "Сенегал": {
    "LAST_32": 1
   },
   "США": {
-   "LAST_32": 3
+   "LAST_32": 3,
+   "LAST_16": 0
   },
   "Босния и Герцеговина": {
    "LAST_32": 0
@@ -349,11 +351,11 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "01:08:23",
+ "updatedAt": "05:03:56",
  "date": "2026-07-07",
  "matches": 72,
- "playoffMatches": 21,
- "lastMatch": "Португалия 0:1 Испания",
+ "playoffMatches": 22,
+ "lastMatch": "США 1:4 Бельгия",
  "lastMatchStage": "1/8",
  "knockoutTeams": [
   "Австралия",
