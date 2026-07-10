@@ -302,7 +302,8 @@
   },
   "Бельгия": {
    "LAST_32": 2,
-   "LAST_16": 3
+   "LAST_16": 3,
+   "QUARTER_FINALS": 0
   },
   "Сенегал": {
    "LAST_32": 1
@@ -316,7 +317,8 @@
   },
   "Испания": {
    "LAST_32": 3,
-   "LAST_16": 3
+   "LAST_16": 3,
+   "QUARTER_FINALS": 3
   },
   "Австрия": {
    "LAST_32": 0
@@ -357,11 +359,11 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "01:06:42",
- "date": "2026-07-10",
+ "updatedAt": "00:07:03",
+ "date": "2026-07-11",
  "matches": 72,
- "playoffMatches": 25,
- "lastMatch": "Франция 2:0 Марокко",
+ "playoffMatches": 26,
+ "lastMatch": "Испания 2:1 Бельгия",
  "lastMatchStage": "1/4",
  "knockoutTeams": [
   "Австралия",
