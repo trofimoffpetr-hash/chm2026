@@ -276,7 +276,8 @@
   },
   "Норвегия": {
    "LAST_32": 3,
-   "LAST_16": 3
+   "LAST_16": 3,
+   "QUARTER_FINALS": 1
   },
   "Франция": {
    "LAST_32": 3,
@@ -293,7 +294,8 @@
    "LAST_32": 0
   },
   "Англия": {
-   "LAST_32": 3
+   "LAST_32": 3,
+   "QUARTER_FINALS": 2
   },
   "ДР Конго": {
    "LAST_32": 0
@@ -357,11 +359,11 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "00:13:46",
+ "updatedAt": "02:53:52",
  "date": "2026-07-12",
  "matches": 72,
- "playoffMatches": 25,
- "lastMatch": "Испания 2:1 Бельгия",
+ "playoffMatches": 26,
+ "lastMatch": "Норвегия 1:2 ОТ Англия",
  "lastMatchStage": "1/4",
  "knockoutTeams": [
   "Австралия",
