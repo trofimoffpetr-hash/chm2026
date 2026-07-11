@@ -287,15 +287,13 @@
    "LAST_32": 0
   },
   "Мексика": {
-   "LAST_32": 3,
-   "LAST_16": 0
+   "LAST_32": 3
   },
   "Эквадор": {
    "LAST_32": 0
   },
   "Англия": {
-   "LAST_32": 3,
-   "LAST_16": 3
+   "LAST_32": 3
   },
   "ДР Конго": {
    "LAST_32": 0
@@ -359,10 +357,10 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "09:15:58",
- "date": "2026-07-11",
+ "updatedAt": "00:13:46",
+ "date": "2026-07-12",
  "matches": 72,
- "playoffMatches": 26,
+ "playoffMatches": 25,
  "lastMatch": "Испания 2:1 Бельгия",
  "lastMatchStage": "1/4",
  "knockoutTeams": [
