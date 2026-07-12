@@ -332,7 +332,8 @@
   },
   "Швейцария": {
    "LAST_32": 3,
-   "LAST_16": 2
+   "LAST_16": 2,
+   "QUARTER_FINALS": 1
   },
   "Алжир": {
    "LAST_32": 0
@@ -346,7 +347,8 @@
   },
   "Аргентина": {
    "LAST_32": 2,
-   "LAST_16": 3
+   "LAST_16": 3,
+   "QUARTER_FINALS": 2
   },
   "Кабо-Верде": {
    "LAST_32": 1
@@ -359,11 +361,11 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "02:53:52",
+ "updatedAt": "06:52:50",
  "date": "2026-07-12",
  "matches": 72,
- "playoffMatches": 26,
- "lastMatch": "Норвегия 1:2 ОТ Англия",
+ "playoffMatches": 27,
+ "lastMatch": "Аргентина 3:1 ОТ Швейцария",
  "lastMatchStage": "1/4",
  "knockoutTeams": [
   "Австралия",
