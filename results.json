@@ -288,13 +288,15 @@
    "LAST_32": 0
   },
   "Мексика": {
-   "LAST_32": 3
+   "LAST_32": 3,
+   "LAST_16": 0
   },
   "Эквадор": {
    "LAST_32": 0
   },
   "Англия": {
    "LAST_32": 3,
+   "LAST_16": 3,
    "QUARTER_FINALS": 2
   },
   "ДР Конго": {
@@ -361,10 +363,10 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "06:52:50",
+ "updatedAt": "09:11:50",
  "date": "2026-07-12",
  "matches": 72,
- "playoffMatches": 27,
+ "playoffMatches": 28,
  "lastMatch": "Аргентина 3:1 ОТ Швейцария",
  "lastMatchStage": "1/4",
  "knockoutTeams": [
