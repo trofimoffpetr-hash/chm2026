@@ -282,7 +282,8 @@
   "Франция": {
    "LAST_32": 3,
    "LAST_16": 3,
-   "QUARTER_FINALS": 3
+   "QUARTER_FINALS": 3,
+   "SEMI_FINALS": 0
   },
   "Швеция": {
    "LAST_32": 0
@@ -320,7 +321,8 @@
   "Испания": {
    "LAST_32": 3,
    "LAST_16": 3,
-   "QUARTER_FINALS": 3
+   "QUARTER_FINALS": 3,
+   "SEMI_FINALS": 3
   },
   "Австрия": {
    "LAST_32": 0
@@ -363,12 +365,12 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "09:11:50",
- "date": "2026-07-12",
+ "updatedAt": "00:04:10",
+ "date": "2026-07-15",
  "matches": 72,
- "playoffMatches": 28,
- "lastMatch": "Аргентина 3:1 ОТ Швейцария",
- "lastMatchStage": "1/4",
+ "playoffMatches": 29,
+ "lastMatch": "Франция 0:2 Испания",
+ "lastMatchStage": "1/2",
  "knockoutTeams": [
   "Австралия",
   "Австрия",
