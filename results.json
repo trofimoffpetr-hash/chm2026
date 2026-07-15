@@ -298,7 +298,8 @@
   "Англия": {
    "LAST_32": 3,
    "LAST_16": 3,
-   "QUARTER_FINALS": 2
+   "QUARTER_FINALS": 2,
+   "SEMI_FINALS": 0
   },
   "ДР Конго": {
    "LAST_32": 0
@@ -352,7 +353,8 @@
   "Аргентина": {
    "LAST_32": 2,
    "LAST_16": 3,
-   "QUARTER_FINALS": 2
+   "QUARTER_FINALS": 2,
+   "SEMI_FINALS": 3
   },
   "Кабо-Верде": {
    "LAST_32": 1
@@ -365,11 +367,11 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "00:04:10",
- "date": "2026-07-15",
+ "updatedAt": "00:09:39",
+ "date": "2026-07-16",
  "matches": 72,
- "playoffMatches": 29,
- "lastMatch": "Франция 0:2 Испания",
+ "playoffMatches": 30,
+ "lastMatch": "Англия 1:2 Аргентина",
  "lastMatchStage": "1/2",
  "knockoutTeams": [
   "Австралия",
