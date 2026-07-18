@@ -283,7 +283,8 @@
    "LAST_32": 3,
    "LAST_16": 3,
    "QUARTER_FINALS": 3,
-   "SEMI_FINALS": 0
+   "SEMI_FINALS": 0,
+   "THIRD_PLACE": 0
   },
   "Швеция": {
    "LAST_32": 0
@@ -299,7 +300,8 @@
    "LAST_32": 3,
    "LAST_16": 3,
    "QUARTER_FINALS": 2,
-   "SEMI_FINALS": 0
+   "SEMI_FINALS": 0,
+   "THIRD_PLACE": 3
   },
   "ДР Конго": {
    "LAST_32": 0
@@ -367,12 +369,12 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "00:09:39",
- "date": "2026-07-16",
+ "updatedAt": "02:09:11",
+ "date": "2026-07-19",
  "matches": 72,
- "playoffMatches": 30,
- "lastMatch": "Англия 1:2 Аргентина",
- "lastMatchStage": "1/2",
+ "playoffMatches": 31,
+ "lastMatch": "Франция 4:6 Англия",
+ "lastMatchStage": "за 3-е",
  "knockoutTeams": [
   "Австралия",
   "Австрия",
