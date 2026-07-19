@@ -326,7 +326,7 @@
    "LAST_16": 3,
    "QUARTER_FINALS": 3,
    "SEMI_FINALS": 3,
-   "FINAL": 3
+   "FINAL": 2
   },
   "Австрия": {
    "LAST_32": 0
@@ -358,7 +358,7 @@
    "LAST_16": 3,
    "QUARTER_FINALS": 2,
    "SEMI_FINALS": 3,
-   "FINAL": 0
+   "FINAL": 1
   },
   "Кабо-Верде": {
    "LAST_32": 1
@@ -371,11 +371,11 @@
    "LAST_32": 0
   }
  },
- "updatedAt": "01:13:29",
+ "updatedAt": "01:17:32",
  "date": "2026-07-20",
  "matches": 72,
  "playoffMatches": 32,
- "lastMatch": "Испания 1:0 Аргентина",
+ "lastMatch": "Испания 1:0 ОТ Аргентина",
  "lastMatchStage": "финал",
  "knockoutTeams": [
   "Австралия",
