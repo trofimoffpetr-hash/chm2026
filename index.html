@@ -158,7 +158,32 @@
   .tline .st.in{background:#3ee37e;box-shadow:0 0 6px rgba(62,227,126,.6)}
   .tline .st.out{background:#ff5d6c;box-shadow:0 0 6px rgba(255,93,108,.55)}
 
-  @media(max-width:900px){.grid{grid-template-columns:1fr}.colhdr .hint{display:none}}
+  /* --- Аналитика (вкладка 3) --- */
+  .champbar{display:flex;align-items:center;gap:14px;background:linear-gradient(180deg,rgba(255,207,77,.12),rgba(255,207,77,.03));border:1px solid rgba(255,207,77,.4);border-radius:18px;padding:16px 20px;margin-bottom:20px}
+  .champbar .cup{font-size:34px;line-height:1}
+  .champbar .ct1{font-family:var(--mono);font-size:10.5px;color:#d2b15a;letter-spacing:1.4px;text-transform:uppercase;font-weight:700}
+  .champbar .ct2{font-family:var(--disp);font-size:23px;font-weight:700;letter-spacing:-.4px;margin-top:2px}
+  .champbar .ct3{color:var(--mut);font-size:12.5px;margin-top:3px;font-weight:500}
+  .agrid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  .agrid>div{min-width:0}
+  .acard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:16px}
+  .ahead{font-family:var(--disp);font-size:15px;font-weight:600;letter-spacing:-.2px;margin-bottom:3px}
+  .asub{font-family:var(--mono);font-size:10px;color:var(--mut2);letter-spacing:.3px;margin-bottom:13px}
+  .abar{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:10px;padding:5px 0}
+  .abar .an{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .abar .atr{height:9px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden}
+  .abar .atr>i{display:block;height:100%;border-radius:6px}
+  .abar .av{font-family:var(--disp);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;min-width:52px}
+  .abar .av small{font-family:var(--mono);font-size:9px;color:var(--mut2);font-weight:500}
+  .arow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line2);font-size:13px}
+  .arow:last-child{border-bottom:none}
+  .arow .al{display:flex;align-items:center;gap:8px;min-width:0}
+  .arow .al .nm2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .arow .ar{font-family:var(--disp);font-weight:700;font-variant-numeric:tabular-nums;flex:0 0 auto}
+  .arow .ar small{font-family:var(--mono);font-size:9px;color:var(--mut2);font-weight:500}
+  .pill{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;flex:0 0 auto}
+
+  @media(max-width:900px){.grid{grid-template-columns:1fr}.colhdr .hint{display:none}.agrid{grid-template-columns:1fr}}
   @media(max-width:560px){
     .wrap{padding:18px 12px 48px}
     .htitle{font-size:21px}
@@ -203,6 +228,7 @@
   <div class="tabs">
     <button class="tab active" id="tab1">Этап 1 · Группа</button>
     <button class="tab" id="tab2">Этап 2 · Плей-офф</button>
+    <button class="tab" id="tab3">Аналитика · Итоги</button>
   </div>
 
   <div id="stage1">
@@ -234,6 +260,8 @@
   </div><!-- /stage1 -->
 
   <div id="stage2" style="display:none"></div>
+
+  <div id="stage3" style="display:none"></div>
 
   <footer>
     Приз лидеру группового этапа — 10% банка. Итог турнира (Раунды 1+2): топ-3 делят 85% в пропорции 45% · 25% · 15%.<br>
@@ -565,20 +593,110 @@ function exportR2(){
   a.href=URL.createObjectURL(blob);a.download='ЧМ2026_плейофф.csv';a.click();
 }
 
-function renderAll(){renderStats();renderPodium();renderBoard();renderTeams();renderStage2();firstRender=false;}
+// --- Аналитика турнира (вкладка 3) ---
+function renderAnalytics(){
+  const el=document.getElementById('stage3');if(!el)return;
+  const P=PLAYERS;
+  const rows=P.map(p=>{const s1=playerScore(p);const s2=playerScoreR2(p);return {p,r1:s1.total,r2:s2.total2,comb:s1.total+s2.total2,lines2:s2.lines};}).sort((a,b)=>b.comb-a.comb);
+  const placeOf={};rows.forEach((o,i)=>placeOf[o.p]=i+1);
+  const r1leader=[...rows].sort((a,b)=>b.r1-a.r1)[0].p;
+  const cR1=p=>BETS[p].reduce((s,b)=>s+b[1],0);
+  const cR2=p=>(BETS_R2[p]||[]).reduce((s,b)=>s+b[1],0);
+  const prizeOf=o=>{let pr=placeOf[o.p]===1?0.45:placeOf[o.p]===2?0.25:placeOf[o.p]===3?0.15:0;pr*=BANK;if(o.p===r1leader)pr+=0.10*BANK;return Math.round(pr);};
+  const po=LIVE.playoff||{};
+  const champ=Object.keys(po).find(t=>po[t]&&po[t].FINAL>=2);
+  const runner=Object.keys(po).find(t=>po[t]&&po[t].FINAL!=null&&po[t].FINAL<=1);
+  const bronze=Object.keys(po).find(t=>po[t]&&po[t].THIRD_PLACE>=2);
+  // рынок команд
+  const teamsAll=[...new Set([].concat(...P.map(p=>BETS[p].map(b=>b[0])),...P.map(p=>(BETS_R2[p]||[]).map(b=>b[0]))))];
+  const mk=teamsAll.map(t=>{const cl=TEAM_CLUSTER[t]||'A';const coef=CLUSTER_COEF[cl];let coins=0,pts=0;
+    for(const p of P){const b1=BETS[p].find(x=>x[0]===t);if(b1){coins+=b1[1];pts+=b1[1]*coef*teamPoints(t);}
+      const b2=(BETS_R2[p]||[]).find(x=>x[0]===t);if(b2){const loy=(r1CoinsOf(p,t)===b2[1])?1.5:1;coins+=b2[1];pts+=b2[1]*coef*loy*playoffStagePts(t);}}
+    return {t,cl,coins,pts,roi:coins?pts/coins:0};});
+  const clAgg={};['A','B','C','D','E'].forEach(cl=>clAgg[cl]={coins:0,pts:0});
+  mk.forEach(m=>{clAgg[m.cl].coins+=m.coins;clAgg[m.cl].pts+=m.pts;});
+  const conc=p=>{const cs=BETS[p].map(b=>b[1]);const tot=cs.reduce((a,b)=>a+b,0);return {max:Math.round(Math.max(...cs)/tot*100),hhi:cs.reduce((a,c)=>a+(c/tot)**2,0)};};
+  const loyB=o=>{let b=0,n=0;o.lines2.forEach(l=>{if(l.loyalty===1.5){b+=l.contrib/3;n++;}});return {b,n};};
+  const champPts=p=>{if(!champ)return 0;const coef=CLUSTER_COEF[TEAM_CLUSTER[champ]||'A'];let v=0;const b1=BETS[p].find(x=>x[0]===champ);if(b1)v+=b1[1]*coef*teamPoints(champ);const b2=(BETS_R2[p]||[]).find(x=>x[0]===champ);if(b2){const loy=(r1CoinsOf(p,champ)===b2[1])?1.5:1;v+=b2[1]*coef*loy*playoffStagePts(champ);}return v;};
+  const bar=(name,frac,val,sub,color)=>`<div class="abar"><div class="an">${name}</div><div class="atr"><i style="width:${Math.max(2,Math.min(100,frac*100)).toFixed(0)}%;background:${color}"></i></div><div class="av">${val}${sub?`<small> ${sub}</small>`:''}</div></div>`;
+  const GRAD='linear-gradient(90deg,var(--lime),var(--cyan))',GOLD='linear-gradient(90deg,var(--gold),#ffe08a)';
+  // --- призовая таблица ---
+  const prizeRows=rows.map((o,i)=>{const medal=i===0?'var(--gold)':i===1?'#cbd5e1':i===2?'#d9914a':'var(--mut2)';const pr=prizeOf(o);const lead=o.p===r1leader;
+    return `<div class="arow"><div class="al">
+        <span style="font-family:var(--disp);font-weight:700;width:20px;text-align:center;color:${medal};flex:0 0 auto">${i+1}</span>
+        <span class="avatar" style="${avatarStyle(o.p,28,11,null)};flex:0 0 auto">${initials(o.p)}</span>
+        <div style="min-width:0"><div class="nm2" style="font-weight:700">${o.p}${lead?' <span class="pill" style="background:rgba(55,215,255,.15);color:var(--cyan)">лидер группы</span>':''}</div>
+          <div style="font-family:var(--mono);font-size:9.5px;color:var(--mut2)">Р1 ${fmt2(o.r1)} · Р2 ${fmt2(o.r2)}</div></div></div>
+      <div style="display:flex;align-items:center;gap:12px;flex:0 0 auto"><span class="ar">${fmt2(o.comb)}</span>
+        <span class="pill" style="min-width:66px;text-align:center;background:${pr>0?'rgba(255,207,77,.16)':'rgba(255,255,255,.05)'};color:${pr>0?'var(--gold)':'var(--mut2)'}">${pr>0?rub(pr):'—'}</span></div></div>`;}).join('');
+  // --- выводы ---
+  const roi=cl=>clAgg[cl].coins?clAgg[cl].pts/clAgg[cl].coins:0;
+  const roiA=roi('A');const roiDE=(clAgg.D.pts+clAgg.E.pts)/((clAgg.D.coins+clAgg.E.coins)||1);
+  const loySorted=rows.map(o=>({p:o.p,...loyB(o)})).sort((a,b)=>b.b-a.b);
+  const winner=rows[0];const trap=[...mk].filter(m=>m.coins>=25).sort((a,b)=>a.roi-b.roi)[0]||{t:'—',coins:0,roi:0};
+  const memo=`<div class="memo" style="margin:2px 0 22px">
+      <div class="mc"><div class="mh">Фавориты решают</div><div class="mb">Кластер A (×1.0) принёс <b>${fmt2(roiA)} очк/монету</b>, а андердоги D–E (×2.0) — лишь ${fmt2(roiDE)}. Повышенный коэффициент за андердога не окупился.</div></div>
+      <div class="mc"><div class="mh">Лояльность работает</div><div class="mb">Повтор ставок Р1→Р2 (×1.5) дал лидеру <b>+${fmt2(loySorted[0].b)} очков</b>. Кто менял ставки — просел в таблице.</div></div>
+      <div class="mc"><div class="mh">Ва-банк — риск, но…</div><div class="mb"><b>${winner.p}</b> зашёл на чемпиона <b>${conc(winner.p).max}%</b> одной ставкой и разорвал таблицу. Сработало — но всё держалось на одной команде.</div></div>
+      <div class="mc"><div class="mh">Ловушка рынка</div><div class="mb"><b>${trap.t}</b> собрала ${trap.coins} монет, а вернула лишь <b>${fmt2(trap.roi)}</b> очк/монету — худшая отдача среди популярных.</div></div>
+    </div>`;
+  // --- эффективность ---
+  const eff=rows.map(o=>({p:o.p,ppc:o.comb/((cR1(o.p)+cR2(o.p))||1)})).sort((a,b)=>b.ppc-a.ppc);
+  const effHtml=eff.map((o,i)=>bar(o.p,o.ppc/eff[0].ppc,fmt2(o.ppc),'очк/мон',i===0?GOLD:GRAD)).join('');
+  // --- кластеры ---
+  const clR=['A','B','C','D','E'].map(cl=>({cl,coins:clAgg[cl].coins,roi:roi(cl)}));const maxCR=Math.max(...clR.map(x=>x.roi));
+  const clHtml=clR.map(x=>bar(`${x.cl} · ×${CLUSTER_COEF[x.cl].toFixed(2)}`,x.roi/maxCR,fmt2(x.roi),`${x.coins} мон`,CLUSTER_COLOR[x.cl])).join('');
+  // --- концентрация ---
+  const concHtml=rows.map((o,i)=>{const c=conc(o.p);return bar(`${i+1}. ${o.p}`,c.max/100,c.max+'%','макс',i===0?GOLD:'linear-gradient(90deg,#4d8dff,#8b97ad)');}).join('');
+  // --- лояльность ---
+  const maxLoy=loySorted[0].b||1;const loyHtml=loySorted.map((o,i)=>bar(o.p,o.b/maxLoy,fmt2(o.b),`${o.n} ст.`,i===0?GOLD:GRAD)).join('');
+  // --- чемпион-фактор ---
+  const chf=rows.map(o=>({p:o.p,share:o.comb?champPts(o.p)/o.comb*100:0})).sort((a,b)=>b.share-a.share);
+  const chfHtml=chf.map((o,i)=>bar(o.p,o.share/100,Math.round(o.share)+'%','',i===0?GOLD:GRAD)).join('');
+  // --- рынок ---
+  const arT=(m,col)=>`<div class="arow"><div class="al"><span class="clb" style="background:${CLUSTER_COLOR[m.cl]}">${m.cl}</span><span class="nm2">${m.t}</span></div><div style="display:flex;gap:10px;align-items:center;flex:0 0 auto"><span style="font-family:var(--mono);font-size:10px;color:var(--mut2)">${m.coins} мон</span><span class="ar" style="color:${col}">${fmt2(m.roi)}<small> о/м</small></span></div></div>`;
+  const gems=[...mk].filter(m=>m.coins>0).sort((a,b)=>b.roi-a.roi).slice(0,6).map(m=>arT(m,'#3ee37e')).join('');
+  const traps=[...mk].filter(m=>m.coins>=25&&m.roi<roiA*0.5).sort((a,b)=>a.roi-b.roi).slice(0,6).map(m=>arT(m,'#ff5d6c')).join('');
+  const champbar=champ?`<div class="champbar"><div class="cup">🏆</div><div><div class="ct1">Чемпион ЧМ 2026</div><div class="ct2">${champ}</div><div class="ct3">${LIVE.lastMatch||''}${runner?` · 🥈 ${runner}`:''}${bronze?` · 🥉 ${bronze}`:''}</div></div></div>`:`<div class="s2note">Турнир ещё не завершён — аналитика обновится по финальным результатам.</div>`;
+  el.innerHTML=`${champbar}
+    <div class="colhdr" style="margin-top:6px"><span class="dot" style="background:var(--gold);box-shadow:0 0 12px var(--gold)"></span><h2>Итог и призовые</h2></div>
+    <div class="acard">${prizeRows}</div>
+    <div class="colhdr"><span class="dot" style="background:var(--lime);box-shadow:0 0 12px var(--lime)"></span><h2>Ключевые выводы</h2></div>
+    ${memo}
+    <div class="colhdr"><span class="dot" style="background:var(--cyan);box-shadow:0 0 12px var(--cyan)"></span><h2>Рынок команд</h2><span class="hint">отдача = очки на монету · кого недооценили и где переплатили</span></div>
+    <div class="acard"><div class="agrid" style="gap:22px">
+      <div><div class="ahead">🔥 Лучшая отдача</div><div class="asub">очков на монету (в скобках — сколько монет собрала)</div>${gems}</div>
+      <div><div class="ahead">🧊 Ловушки турнира</div><div class="asub">популярные, но со слабой отдачей</div>${traps}</div>
+    </div></div>
+    <div class="agrid">
+      <div>
+        <div class="acard"><div class="ahead">Эффективность игроков</div><div class="asub">очки на вложенную монету (Р1+Р2)</div>${effHtml}</div>
+        <div class="acard"><div class="ahead">Концентрация → место</div><div class="asub">макс. ставка одного игрока, % от 100 монет · сверху вниз — итоговое место</div>${concHtml}</div>
+      </div>
+      <div>
+        <div class="acard"><div class="ahead">Доходность по кластерам</div><div class="asub">очки на монету · A — фавориты, E — тёмные лошадки</div>${clHtml}</div>
+        <div class="acard"><div class="ahead">Бонус лояльности ×1.5</div><div class="asub">сколько очков принёс повтор ставок Этапа 1</div>${loyHtml}</div>
+        <div class="acard"><div class="ahead">Фактор чемпиона${champ?' ('+champ+')':''}</div><div class="asub">доля очков от чемпиона в итоге игрока</div>${chfHtml}</div>
+      </div>
+    </div>`;
+}
 
+function renderAll(){renderStats();renderPodium();renderBoard();renderTeams();renderStage2();renderAnalytics();firstRender=false;}
+
+const HSUB={'1':'РАУНД 1 — ГРУППОВОЙ ЭТАП · ПОРТФЕЛЬНЫЙ ПРОГНОЗ','2':'РАУНД 2 — ПЛЕЙ-ОФФ · ПОРТФЕЛЬНЫЙ ПРОГНОЗ','3':'ИТОГИ · АНАЛИТИКА ТУРНИРА'};
 function setStage(s){
-  document.getElementById('stage1').style.display=s==='2'?'none':'';
+  document.getElementById('stage1').style.display=s==='1'?'':'none';
   document.getElementById('stage2').style.display=s==='2'?'':'none';
-  document.getElementById('tab1').classList.toggle('active',s!=='2');
+  document.getElementById('stage3').style.display=s==='3'?'':'none';
+  document.getElementById('tab1').classList.toggle('active',s==='1');
   document.getElementById('tab2').classList.toggle('active',s==='2');
-  document.getElementById('hsub').textContent = s==='2'
-    ? 'РАУНД 2 — ПЛЕЙ-ОФФ · ПОРТФЕЛЬНЫЙ ПРОГНОЗ'
-    : 'РАУНД 1 — ГРУППОВОЙ ЭТАП · ПОРТФЕЛЬНЫЙ ПРОГНОЗ';
+  document.getElementById('tab3').classList.toggle('active',s==='3');
+  document.getElementById('hsub').textContent=HSUB[s]||HSUB['1'];
   try{localStorage.setItem('wc_stage',s);}catch(e){}
 }
 document.getElementById('tab1').onclick=()=>setStage('1');
 document.getElementById('tab2').onclick=()=>setStage('2');
+document.getElementById('tab3').onclick=()=>setStage('3');
 let _savedStage='1';try{_savedStage=localStorage.getItem('wc_stage')||'1';}catch(e){}
 setStage(_savedStage);
 
